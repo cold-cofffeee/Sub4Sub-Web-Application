@@ -1,0 +1,51 @@
+# Ignore environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore uploads
+uploads/*
+!uploads/.gitkeep
+
+# Ignore logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# Ignore cache
+cache/*
+!cache/.gitkeep
+
+# Ignore vendor (if using Composer)
+vendor/
+
+# Ignore node modules
+node_modules/
+
+# Ignore build files
+dist/
+build/
+
+# Ignore temporary files
+tmp/
+temp/
+*.tmp
+
+# Ignore database dumps
+*.sql
+*.sqlite
+
+# Ignore credentials
+credentials.json
+service-account.json
