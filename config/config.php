@@ -27,7 +27,7 @@ define('DB_CHARSET', 'utf8mb4');
 // Application Configuration
 define('APP_NAME', 'SUB4SUB');
 define('APP_VERSION', '2.0.0');
-define('APP_URL', getenv('APP_URL') ?: 'http://localhost');
+define('APP_URL', getenv('APP_URL') ?: 'http://localhost/Sub4Sub-Web-Application');
 define('SITE_KEY', getenv('SITE_KEY') ?: bin2hex(random_bytes(32)));
 
 // Security Configuration

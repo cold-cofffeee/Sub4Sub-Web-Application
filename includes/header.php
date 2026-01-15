@@ -111,8 +111,8 @@ if (isLoggedIn()) {
                         
                         <?php if (isLoggedIn()): ?>
                             <li class="nav-item">
-                                <a class="nav-link-modern <?= $currentPage === 'sub4sub' ? 'active' : '' ?>" href="sub4sub.php">
-                                    <i class="fas fa-users"></i> SUB4SUB
+                                <a class="nav-link-modern <?= $currentPage === 'exchange' ? 'active' : '' ?>" href="exchange.php">
+                                    <i class="fas fa-exchange-alt"></i> Exchange
                                 </a>
                             </li>
                             
@@ -124,8 +124,8 @@ if (isLoggedIn()) {
                             
                             <?php if (isAdmin()): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link-modern" href="Admin/adminDashboard.php">
-                                        <i class="fas fa-cog"></i> Admin
+                                    <a class="nav-link-modern" href="Admin/dashboard.php">
+                                        <i class="fas fa-user-shield"></i> Admin
                                     </a>
                                 </li>
                             <?php endif; ?>

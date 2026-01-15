@@ -28,7 +28,7 @@
                     <ul class="footer-links">
                         <li><a href="index.php">Home</a></li>
                         <li><a href="about.php">About Us</a></li>
-                        <li><a href="sub4sub.php">SUB4SUB</a></li>
+                        <li><a href="exchange.php">Exchange</a></li>
                         <li><a href="faq.php">FAQ</a></li>
                         <li><a href="contact.php">Contact</a></li>
                     </ul>

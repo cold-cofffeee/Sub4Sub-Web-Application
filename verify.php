@@ -18,7 +18,7 @@ if (!isset($_SESSION['redirected_from_sub4sub']) || !$_SESSION['redirected_from_
     echo '
     <div class="container mt-3">
         <div class="alert alert-danger" role="alert">
-            You are not authorized to access this page directly. Please go to the <a href="sub4sub.php" class="alert-link">sub4sub page</a> first.
+            You are not authorized to access this page directly. Please go to the <a href="exchange.php" class="alert-link">exchange page</a> first.
         </div>
     </div>';
     include 'functions/footer.php';

@@ -80,7 +80,7 @@ body {
     font-size: 16px;
     line-height: 1.6;
     color: var(--gray-800);
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #f8f9fa;
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -783,3 +783,20 @@ a:hover {
     text-align: center;
     color: var(--gray-400);
 }
+
+
+/* ===== Enhanced Responsive Fixes ===== */
+@media (max-width: 992px) {
+    .hero-title { font-size: 3rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.5rem; }
+    .btn-modern { width: 100%; margin-bottom: 0.5rem; }
+}
+@media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .hero-modern { padding: 2rem 0; }
+}
+img, video, iframe { max-width: 100%; height: auto; }
+.table-responsive { overflow-x: auto; }

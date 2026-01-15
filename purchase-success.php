@@ -65,8 +65,8 @@ $isDemo = isset($_GET['demo']) && $_GET['demo'] == '1';
             <a href="account.php" class="btn-modern btn-primary-modern btn-lg me-3">
                 <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
             </a>
-            <a href="sub4sub.php" class="btn-modern btn-success-modern btn-lg">
-                <i class="fas fa-users me-2"></i> Start Exchanging
+            <a href="exchange.php" class="btn-modern btn-success-modern btn-lg">
+                <i class="fas fa-exchange-alt me-2"></i> Start Exchanging
             </a>
         </div>
         

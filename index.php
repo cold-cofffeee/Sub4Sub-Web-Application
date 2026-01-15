@@ -27,7 +27,7 @@ require_once 'includes/header.php';
                         <i class="fas fa-info-circle"></i> Learn More
                     </a>
                 <?php else: ?>
-                    <a href="sub4sub.php" class="btn-modern btn-primary-modern btn-lg me-3">
+                    <a href="exchange.php" class="btn-modern btn-primary-modern btn-lg me-3">
                         <i class="fas fa-users"></i> Start Exchanging
                     </a>
                     <a href="account.php" class="btn-modern btn-secondary-modern btn-lg">
