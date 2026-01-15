@@ -14,8 +14,16 @@ class EmailService {
     
     /**
      * Send email using PHP mail() or SMTP
+     * Gracefully degrades if SMTP credentials not configured
      */
     public function send($to, $subject, $body, $isHTML = true) {
+        // Check if email is configured
+        if (!$this->isConfigured()) {
+            // Email not configured - log but don't fail
+            error_log("EmailService: Email not sent (not configured). To: $to, Subject: $subject");
+            return true; // Return true to prevent blocking app functionality
+        }
+        
         $headers = [];
         
         if ($isHTML) {
@@ -27,7 +35,36 @@ class EmailService {
         $headers[] = 'Reply-To: ' . $this->config['email']['from_email'];
         $headers[] = 'X-Mailer: PHP/' . phpversion();
         
-        return mail($to, $subject, $body, implode("\r\n", $headers));
+        $result = @mail($to, $subject, $body, implode("\r\n", $headers));
+        
+        if (!$result) {
+            error_log("EmailService: Failed to send email. To: $to, Subject: $subject");
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Check if email service is properly configured
+     */
+    public function isConfigured() {
+        // Check if basic email config exists
+        if (!isset($this->config['email']) || 
+            empty($this->config['email']['from_email']) || 
+            !filter_var($this->config['email']['from_email'], FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+        
+        // Check if SMTP is configured (optional - can work with PHP mail())
+        $smtpHost = getenv('SMTP_HOST') ?: (defined('SMTP_HOST') ? SMTP_HOST : null);
+        $smtpUser = getenv('SMTP_USER') ?: (defined('SMTP_USER') ? SMTP_USER : null);
+        
+        // If SMTP env vars are set but empty, email is intentionally disabled
+        if (isset($_ENV['SMTP_HOST']) && empty($_ENV['SMTP_HOST'])) {
+            return false;
+        }
+        
+        return true; // Email configured or PHP mail() available
     }
     
     /**

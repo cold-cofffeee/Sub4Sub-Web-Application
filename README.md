@@ -1,80 +1,254 @@
-# Sub4Sub Web Application
-This is a fully open-source advanced Sub4Sub Web Application made with PHP and MySQL database by Hiranmay Roy and Sameer Pathak.
+# SUB4SUB v2.0 - Professional Production Setup Guide
 
-A "sub4sub" website is a platform where users exchange subscriptions (subs) for their YouTube channels with each other. The idea is that if you subscribe to someone else's channel, they will subscribe to yours in return. It's often used to artificially boost subscriber counts.
+## 🚀 Quick Start (5 Minutes)
 
-# What is the purpose of this project?
+### 1. Database Setup
+```sql
+CREATE DATABASE sub4sub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-The purpose of this project is to create a simple and easy to use Sub4Sub Web Application, but has some premium quality features.
+Then run the migration:
+```bash
+php install/migrate.php
+```
 
+### 2. Environment Configuration
+```bash
+cp .env.example .env
+```
 
-Note: This is just begging of an era, wait and see what we do 🤓💡😎🧠
-# How does it work?
+Edit `.env` with your settings:
+```env
+# Required - Database
+DB_HOST=localhost
+DB_NAME=sub4sub
+DB_USER=root
+DB_PASS=your_password
 
-1. User A creates a subscription for User B
-2. User B creates a subscription for User A
+# Required - Admin Access
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=ChangeThisPassword123!
 
-# How to run this project?
+# Optional - Email (Leave empty to disable)
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
 
-All you have to do is:
+# Optional - Payments (Leave empty for demo mode)
+STRIPE_SECRET_KEY=sk_live_your_stripe_key
+PAYPAL_CLIENT_ID=your_paypal_client_id
+```
 
-1. Clone this repository
-2. Open the project in your favorite IDE
-3. Create a database named `sub4sub`
-4. Update the `config.php` file with your database credentials
-5. Run the project
-6. You must have to install <b>Xampp</b> or <b>Wampserver</b> on your machine to run this project perfectly.
-7. Boom 🔥🔥
+### 3. Access Your Site
+- **Website**: http://yourdomain.com
+- **Admin Panel**: http://yourdomain.com/Admin/login.php
+- **Default Admin**: admin / admin123 (Change in .env!)
 
+---
 
-# Features
+## 📁 Professional File Structure
 
-- [✔️] User Authentication
-- [✔️] User Registration
-- [✔️] User Profile
-- [✔️] Admin Panel
-    - User management (Create, Edit, Delete, View)
-    - User submission management (Create, Edit, Delete, View)
-    - Dynamic Content Edit (View, Privacy, TOS, About, Contact)
-- [✔️] Sub4Sub Management
-- [✔️] Payment Management
+```
+Sub4Sub-Web-Application/
+├── Admin/                          # Admin Panel
+│   ├── login.php                   # Admin authentication
+│   ├── dashboard.php               # Statistics & overview
+│   ├── users.php                   # User management
+│   ├── payments.php                # Payment history
+│   ├── settings.php                # Global settings
+│   ├── content-management.php      # Content hub
+│   └── ...
+│
+├── api/                            # RESTful API
+├── assets/                         # CSS, JS, Images
+├── classes/                        # OOP Architecture
+│   ├── Database.php                # PDO singleton
+│   ├── User.php                    # User model
+│   ├── Security.php                # Security utilities
+│   ├── EmailService.php            # Email (optional)
+│   └── Logger.php                  # Logging system
+│
+├── config/                         # Configuration
+├── includes/                       # Header/Footer templates
+├── install/                        # Database migration
+│
+├── index.php                       # Landing page
+├── account.php                     # User dashboard
+├── exchange.php                    # Subscription exchange
+├── purchase.php                    # Premium checkout
+├── .env.example                    # Environment template
+└── README.md                       # This file
+```
 
+---
 
-# {Upcoming Features}
+## 💳 Payment Gateway Integration
 
-- [x] Payment History
-- [x] Payment Cancellation
-- [x] Admin Notification Controls
-  - Manage user notifications with ease.
-- [x] Send Notifications
-  - Dispatch notifications (of all types) to individual users or groups.
-- [x] Notification Icon & Page
-  - Access notifications through an icon in the top right corner, with a dedicated notification page.
-- [x] Admin Role Assignment & Premium Status
-  - Grant admin roles from the users page or upgrade users to premium by selecting checkboxes.
-- [x] Admin Export Functionality
-  - Allow admins to export data in both CSV and PDF formats simultaneously.
-    - All users.
-    - Filtered premium users.
-    - Payment details
-- [x] Limits
-  - Set a number of channels to be subscribed
-    - For free users
-    - For Specific Users
-    - For a group of users
+### Demo Mode (Default - No Configuration Needed)
+- Works immediately without any setup
+- Creates test transactions
+- Perfect for development
 
+### Stripe Integration
+1. Get API keys from https://dashboard.stripe.com/apikeys
+2. Add to `.env`: `STRIPE_SECRET_KEY=sk_live_xxxxx`
+3. Users can pay with credit cards
 
-# Demo Account
-Visit: <a href="https://pathaksameer.com.np/account.php" target="_blank">Here</a>
+### PayPal Integration
+1. Create app at https://developer.paypal.com
+2. Add to `.env`: `PAYPAL_CLIENT_ID=xxxxx`
+3. PayPal checkout enabled
 
-## Admin Panel Login:
-- Username: admin
-- Password: password
+---
 
-## User Panel Login:
-- Create an account then test
-# Preview
+## 📧 Email Configuration (100% Optional)
 
-## Watch this video:
+**The app works perfectly without email configuration.**
 
-<a href="https://youtu.be/mmb-ER3pNvw" target="_blank"><img src="https://i.ibb.co/K9pF8Qb/sddefault.jpg" alt="Watch this video" width="640" height="360" border="10" /></a>
+Leave SMTP settings empty in `.env` to disable:
+```env
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+```
+
+To enable Gmail:
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+```
+
+---
+
+## 🔒 Security Features
+
+✅ CSRF Protection  
+✅ Password Hashing (bcrypt)  
+✅ SQL Injection Prevention  
+✅ XSS Protection  
+✅ Rate Limiting  
+✅ Session Security  
+✅ API Authentication  
+✅ Activity Logging  
+✅ AES-256 Encryption
+
+---
+
+## 🎨 Modern Features
+
+### User Features
+- Responsive Design
+- Real-time Statistics
+- AJAX Operations
+- Premium Subscriptions
+- Analytics Dashboard
+- Notification System
+
+### Admin Features
+- Modern Dashboard
+- User Management
+- Payment Tracking
+- Content Management
+- Activity Logs
+- Settings Panel
+
+---
+
+## 🎯 Pricing Plans
+
+- **Free**: 10 subscriptions/day, basic features
+- **Monthly ($9.99)**: Unlimited subscriptions, advanced analytics
+- **Quarterly ($24.99)**: Save 17%, extended features
+- **Yearly ($99.99)**: Save 17%, all features
+
+---
+
+## 🌐 Production Deployment
+
+### Security Checklist
+- [ ] Change `ADMIN_PASSWORD` in `.env`
+- [ ] Set `APP_ENV=production`
+- [ ] Set `APP_DEBUG=false`
+- [ ] Configure payment gateways
+- [ ] Set up HTTPS/SSL
+- [ ] Configure backups
+
+### Performance
+```php
+// Enable OPcache in php.ini
+opcache.enable=1
+opcache.memory_consumption=128
+```
+
+---
+
+## 🆘 Troubleshooting
+
+**Database Error**: Check `.env` DB credentials  
+**Admin Can't Login**: Default is admin/admin123  
+**Email Not Sending**: This is normal - email is optional  
+**Payment Not Working**: Demo mode is automatic  
+**Styling Broken**: Clear browser cache
+
+---
+
+## 🔌 API Endpoints
+
+```
+POST /api/auth/login
+POST /api/auth/register
+GET  /api/users/me
+GET  /api/subscriptions
+POST /api/subscriptions
+GET  /api/notifications
+```
+
+Authentication: Bearer token in `Authorization` header
+
+---
+
+## 📊 Database Schema
+
+**8 Tables**:
+- users
+- subscriptions
+- payments
+- notifications
+- activity_logs
+- settings
+- points
+- api_tokens
+
+---
+
+## 📝 Version 2.0.0 Features
+
+✅ Complete codebase overhaul  
+✅ Modern OOP architecture  
+✅ Professional file naming  
+✅ Working payment gateways  
+✅ Optional email system  
+✅ Modern admin panel  
+✅ Responsive design  
+✅ Comprehensive security  
+✅ RESTful API  
+✅ Production-ready
+
+---
+
+## ⭐ Pro Tips
+
+1. Always backup before updates
+2. Use strong passwords in production
+3. Enable HTTPS for payments
+4. Monitor logs regularly
+5. Test payments in sandbox mode first
+6. Keep PHP and MySQL updated
+
+---
+
+**Built with PHP 8.0+, MySQL 5.7+, Bootstrap 5**
+
+**Ready to launch! 🚀**
