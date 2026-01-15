@@ -4,8 +4,13 @@
  * Professional and responsive header with enhanced UI
  */
 
-// Load configuration
-require_once __DIR__ . '/../config/config.php';
+// Check if we're on install page - skip config loading
+$isInstallPage = basename($_SERVER['PHP_SELF']) === 'install.php';
+
+if (!$isInstallPage) {
+    // Load configuration only if not installing
+    require_once __DIR__ . '/../config/config.php';
+}
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -25,12 +30,17 @@ function isAdmin() {
 // Get current page
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
-// Get user data if logged in
+// Get user data if logged in (only if not installing)
 $userData = null;
-if (isLoggedIn()) {
-    require_once __DIR__ . '/../classes/Database.php';
-    require_once __DIR__ . '/../classes/User.php';
-    $userData = User::find($_SESSION['user_id']);
+if (!$isInstallPage && isLoggedIn()) {
+    try {
+        require_once __DIR__ . '/../classes/Database.php';
+        require_once __DIR__ . '/../classes/User.php';
+        $userData = User::find($_SESSION['user_id']);
+    } catch (Exception $e) {
+        // Database not ready - continue without user data
+        $userData = null;
+    }
 }
 ?>
 <!DOCTYPE html>

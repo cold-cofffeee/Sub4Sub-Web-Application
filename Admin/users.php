@@ -145,11 +145,11 @@ $pageTitle = 'User Management - Admin';
                     <a class="nav-link active" href="users.php">
                         <i class="fas fa-users me-2"></i> Users
                     </a>
+                    <a class="nav-link" href="verify-users.php">
+                        <i class="fas fa-user-check me-2"></i> Verify Users
+                    </a>
                     <a class="nav-link" href="payments.php">
                         <i class="fas fa-credit-card me-2"></i> Payments
-                    </a>
-                    <a class="nav-link" href="subscriptions.php">
-                        <i class="fas fa-exchange-alt me-2"></i> Subscriptions
                     </a>
                     <a class="nav-link" href="settings.php">
                         <i class="fas fa-cog me-2"></i> Settings
@@ -157,10 +157,10 @@ $pageTitle = 'User Management - Admin';
                     <a class="nav-link" href="content-management.php">
                         <i class="fas fa-edit me-2"></i> Content
                     </a>
-                    <a class="nav-link" href="logs.php">
-                        <i class="fas fa-file-alt me-2"></i> Activity Logs
-                    </a>
                     <hr class="bg-white">
+                    <a class="nav-link" href="../index.php" target="_blank">
+                        <i class="fas fa-external-link-alt me-2"></i> View Site
+                    </a>
                     <a class="nav-link" href="logout.php">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                     </a>

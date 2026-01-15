@@ -7,11 +7,9 @@
 class Database {
     private static $instance = null;
     private $pdo;
-    private $config;
     
     private function __construct() {
         require_once __DIR__ . '/../config/config.php';
-        $this->config = include __DIR__ . '/../config/config.php';
         $this->connect();
     }
     
@@ -29,11 +27,16 @@ class Database {
      * Establish database connection
      */
     private function connect() {
+        // Check if constants are defined
+        if (!defined('DB_HOST') || !defined('DB_NAME')) {
+            throw new Exception("Database configuration not loaded. Please run install.php first.");
+        }
+        
         $dsn = sprintf(
             "mysql:host=%s;dbname=%s;charset=%s",
-            $this->config['database']['host'],
-            $this->config['database']['name'],
-            $this->config['database']['charset']
+            DB_HOST,
+            DB_NAME,
+            DB_CHARSET
         );
         
         $options = [
@@ -46,13 +49,13 @@ class Database {
         try {
             $this->pdo = new PDO(
                 $dsn,
-                $this->config['database']['user'],
-                $this->config['database']['password'],
+                DB_USER,
+                DB_PASS,
                 $options
             );
         } catch (PDOException $e) {
             error_log("Database Connection Failed: " . $e->getMessage());
-            throw new Exception("Database connection failed. Please check configuration.");
+            throw new Exception("Database connection failed. Please run install.php to set up the database.");
         }
     }
     

@@ -20,20 +20,26 @@ $db = Database::getInstance();
 $pageTitle = 'Admin Dashboard - SUB4SUB';
 
 // Get statistics
-$stats = [
-    'total_users' => $db->query("SELECT COUNT(*) as count FROM users")->fetch()['count'],
-    'premium_users' => $db->query("SELECT COUNT(*) as count FROM users WHERE is_premium = 1")->fetch()['count'],
-    'total_subscriptions' => $db->query("SELECT COUNT(*) as count FROM subscriptions")->fetch()['count'],
-    'total_revenue' => $db->query("SELECT SUM(amount) as total FROM payments WHERE status = 'completed'")->fetch()['total'] ?? 0,
-    'new_users_today' => $db->query("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = CURDATE()")->fetch()['count'],
-    'active_users' => $db->query("SELECT COUNT(*) as count FROM users WHERE last_login >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetch()['count']
-];
+try {
+    $stats = [
+        'total_users' => $db->query("SELECT COUNT(*) as count FROM users")->fetch()['count'] ?? 0,
+        'premium_users' => $db->query("SELECT COUNT(*) as count FROM users WHERE is_premium = 1")->fetch()['count'] ?? 0,
+        'total_subscriptions' => $db->query("SELECT COUNT(*) as count FROM subscriptions")->fetch()['count'] ?? 0,
+        'total_revenue' => $db->query("SELECT SUM(amount) as total FROM payments WHERE status = 'completed'")->fetch()['total'] ?? 0,
+        'new_users_today' => $db->query("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = CURDATE()")->fetch()['count'] ?? 0,
+        'active_users' => $db->query("SELECT COUNT(*) as count FROM users WHERE last_login >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetch()['count'] ?? 0
+    ];
 
-// Get recent users
-$recentUsers = $db->query("SELECT id, username, email, created_at, is_premium FROM users ORDER BY created_at DESC LIMIT 10")->fetchAll();
+    // Get recent users
+    $recentUsers = $db->query("SELECT id, username, email, created_at, is_premium FROM users ORDER BY created_at DESC LIMIT 10")->fetchAll();
 
-// Get recent payments
-$recentPayments = $db->query("SELECT p.*, u.username, u.email FROM payments p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 10")->fetchAll();
+    // Get recent payments
+    $recentPayments = $db->query("SELECT p.*, u.username, u.email FROM payments p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 10")->fetchAll();
+} catch (Exception $e) {
+    $stats = ['total_users' => 0, 'premium_users' => 0, 'total_subscriptions' => 0, 'total_revenue' => 0, 'new_users_today' => 0, 'active_users' => 0];
+    $recentUsers = [];
+    $recentPayments = [];
+}
 
 ?>
 <!DOCTYPE html>
@@ -87,20 +93,17 @@ $recentPayments = $db->query("SELECT p.*, u.username, u.email FROM payments p JO
                     <a class="nav-link" href="users.php">
                         <i class="fas fa-users me-2"></i> Users
                     </a>
+                    <a class="nav-link" href="verify-users.php">
+                        <i class="fas fa-user-check me-2"></i> Verify Users
+                    </a>
                     <a class="nav-link" href="payments.php">
                         <i class="fas fa-credit-card me-2"></i> Payments
-                    </a>
-                    <a class="nav-link" href="subscriptions.php">
-                        <i class="fas fa-exchange-alt me-2"></i> Subscriptions
                     </a>
                     <a class="nav-link" href="settings.php">
                         <i class="fas fa-cog me-2"></i> Settings
                     </a>
                     <a class="nav-link" href="content-management.php">
                         <i class="fas fa-edit me-2"></i> Content
-                    </a>
-                    <a class="nav-link" href="logs.php">
-                        <i class="fas fa-file-alt me-2"></i> Activity Logs
                     </a>
                     <hr class="bg-white">
                     <a class="nav-link" href="../index.php" target="_blank">

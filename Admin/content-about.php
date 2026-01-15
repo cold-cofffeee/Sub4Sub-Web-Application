@@ -1,38 +1,42 @@
 <?php
-// adminAbout.php
-include '../functions/header.php';
-include '../functions/db.php';
-include '../functions/auth.php';
+/**
+ * Admin - Edit About Page Content
+ */
 
-if (!isAdminLoggedIn()) {
-    header('Location: adminLogin.php');
+session_start();
+require_once '../config/config.php';
+require_once '../classes/Database.php';
+
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: login.php');
     exit;
 }
 
+$db = Database::getInstance();
 $message = '';
 $messageType = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!validateCsrfToken($_POST['csrf_token'])) {
-        $message = 'Invalid CSRF token.';
-        $messageType = 'error';
-    } else {
-        $content = $_POST['content'];
-        $stmt = $pdo->prepare("UPDATE about_content SET content = ? WHERE id = 1");
-        if ($stmt->execute([$content])) {
-            $message = 'Content updated successfully.';
-            $messageType = 'success';
-        } else {
-            $message = 'Failed to update content.';
-            $messageType = 'error';
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $content = $_POST['content'] ?? '';
+    try {
+        $db->query("UPDATE about_content SET content = ? WHERE id = 1", [$content]);
+        $message = 'Content updated successfully.';
+        $messageType = 'success';
+    } catch (Exception $e) {
+        $message = 'Failed to update content: ' . $e->getMessage();
+        $messageType = 'danger';
     }
 }
 
 // Fetch the current content
-$stmt = $pdo->prepare("SELECT content FROM about_content WHERE id = 1");
-$stmt->execute();
-$content = $stmt->fetchColumn();
+try {
+    $result = $db->query("SELECT content FROM about_content WHERE id = 1")->fetch();
+    $content = $result['content'] ?? '';
+} catch (Exception $e) {
+    $content = '';
+    $message = 'Database not ready. Please run installation first.';
+    $messageType = 'warning';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

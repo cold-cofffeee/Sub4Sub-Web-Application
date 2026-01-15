@@ -238,18 +238,28 @@ class Security {
      * Log activity
      */
     public static function logActivity($userId, $action, $description = null, $metadata = null) {
-        $db = Database::getInstance();
-        
-        $data = [
-            'user_id' => $userId,
-            'action' => $action,
-            'description' => $description,
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-            'metadata' => $metadata ? json_encode($metadata) : null
-        ];
-        
-        $db->insert('activity_logs', $data);
+        try {
+            // Check if installation is complete
+            if (!file_exists(__DIR__ . '/../config/installed.lock')) {
+                return; // Skip logging if not installed
+            }
+            
+            $db = Database::getInstance();
+            
+            $data = [
+                'user_id' => $userId,
+                'action' => $action,
+                'description' => $description,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'metadata' => $metadata ? json_encode($metadata) : null
+            ];
+            
+            $db->insert('activity_logs', $data);
+        } catch (Exception $e) {
+            // Silently fail if database not ready
+            error_log("Activity logging failed: " . $e->getMessage());
+        }
     }
     
     /**
