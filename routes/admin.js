@@ -73,9 +73,21 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     console.error('Admin dashboard error:', error);
-    req.session.message = 'Error loading dashboard';
-    req.session.messageType = 'error';
-    res.redirect('/');
+    res.render('admin/dashboard', {
+      pageTitle: 'Admin Dashboard - SUB4SUB',
+      stats: {
+        totalUsers: 0,
+        premiumUsers: 0,
+        totalSubscriptions: 0,
+        totalRevenue: 0,
+        newUsersToday: 0,
+        activeUsers: 0,
+        pendingVerifications: 0
+      },
+      recentUsers: [],
+      recentPayments: [],
+      pendingSubscriptions: []
+    });
   }
 });
 
