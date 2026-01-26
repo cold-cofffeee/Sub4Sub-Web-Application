@@ -108,6 +108,10 @@ app.use(errorHandler);
 const qualityScoreUpdater = require('./utils/qualityScoreUpdater');
 qualityScoreUpdater.startQualityScoreScheduler();
 
+// Start premium expiry scheduler (runs daily at midnight)
+const premiumExpiryScheduler = require('./utils/premiumExpiryScheduler');
+premiumExpiryScheduler.startPremiumExpiryScheduler();
+
 // Start server
 const PORT = config.port;
 app.listen(PORT, () => {
@@ -120,6 +124,7 @@ app.listen(PORT, () => {
 ║   MongoDB: Connected                   ║
 ║   URL: ${config.app.url.padEnd(29)} ║
 ║   Quality Scheduler: Active            ║
+║   Premium Expiry Scheduler: Active     ║
 ╚════════════════════════════════════════╝
   `);
 });

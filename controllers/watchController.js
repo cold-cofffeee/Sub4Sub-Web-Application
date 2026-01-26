@@ -7,6 +7,7 @@ const WatchRoom = require('../models/WatchRoom');
 const WatchSession = require('../models/WatchSession');
 const User = require('../models/User');
 const config = require('../config/config');
+const { validateYouTubeUrl } = require('../utils/youtubeValidator');
 
 /**
  * Create a new watch room
@@ -16,6 +17,19 @@ exports.createRoom = async (req, res) => {
     const { contentUrl, contentTitle, contentType, requiredWatchMinutes, maxParticipants, isPublic, category, language } = req.body;
     
     const user = await User.findById(req.session.user._id);
+    
+    // Validate YouTube URL
+    const urlValidation = validateYouTubeUrl(contentUrl, contentType);
+    if (!urlValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: urlValidation.error || 'Invalid YouTube URL'
+      });
+    }
+    
+    // Use normalized URL
+    const normalizedUrl = urlValidation.normalizedUrl;
+    const videoId = urlValidation.videoId;
     
     // Calculate total credits needed
     const creditsPerMinute = config.credits.earnings.watchMinute;
@@ -41,7 +55,7 @@ exports.createRoom = async (req, res) => {
     // Create room
     const room = new WatchRoom({
       creatorId: user._id,
-      contentUrl,
+      contentUrl: normalizedUrl,
       contentTitle,
       contentType: contentType || 'video',
       requiredWatchMinutes,

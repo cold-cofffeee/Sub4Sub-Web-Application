@@ -42,6 +42,26 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // Premium subscription details
+  premiumTier: {
+    type: String,
+    enum: ['free', 'basic', 'pro', 'elite'],
+    default: null
+  },
+  premiumDuration: {
+    type: Number, // Duration in days
+    default: null
+  },
+  // Idempotency
+  processed: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  processedAt: {
+    type: Date,
+    default: null
+  },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
     default: {}

@@ -15,6 +15,7 @@ const Payment = require('../models/Payment');
 // Import new controllers
 const watchController = require('../controllers/watchController');
 const referralController = require('../controllers/referralController');
+const { processPremiumUpgrade } = require('../utils/premiumHelper');
 
 // Rate limiting
 const apiLimiter = rateLimit({
@@ -241,38 +242,59 @@ router.get('/stats', async (req, res) => {
 // Process payment (demo mode)
 router.post('/payments/demo', isAuthenticated, async (req, res) => {
   try {
-    const { amount, description } = req.body;
+    const { amount, description, plan, duration } = req.body;
     
-    // Create demo payment
+    // Map plan to tier and duration
+    const tierMap = {
+      'basic-monthly': { tier: 'basic', days: 30, price: 9.99 },
+      'basic-yearly': { tier: 'basic', days: 365, price: 99.99 },
+      'pro-monthly': { tier: 'pro', days: 30, price: 19.99 },
+      'pro-yearly': { tier: 'pro', days: 365, price: 199.99 },
+      'elite-monthly': { tier: 'elite', days: 30, price: 49.99 },
+      'elite-yearly': { tier: 'elite', days: 365, price: 499.99 }
+    };
+    
+    const planDetails = tierMap[plan] || { tier: 'basic', days: 30, price: 9.99 };
+    
+    // Create demo payment with idempotency
+    const transactionId = `DEMO-${Date.now()}-${req.session.user._id}`;
+    
     const payment = await Payment.create({
       userId: req.session.user._id,
-      amount: amount || 9.99,
+      amount: amount || planDetails.price,
       currency: 'USD',
       paymentMethod: 'demo',
-      transactionId: `DEMO-${Date.now()}`,
+      transactionId: transactionId,
       status: 'completed',
-      description: description || 'Premium subscription',
-      metadata: { mode: 'demo' }
+      description: description || `${planDetails.tier.toUpperCase()} Premium - ${planDetails.days} days`,
+      premiumTier: planDetails.tier,
+      premiumDuration: planDetails.days,
+      metadata: { mode: 'demo', plan }
     });
     
-    // Upgrade user to premium
-    await User.findByIdAndUpdate(req.session.user._id, { isPremium: true });
+    // Process premium upgrade (with idempotency check)
+    const upgraded = await processPremiumUpgrade(payment);
+    
+    if (!upgraded.success) {
+      return res.status(400).json({
+        success: false,
+        message: upgraded.message
+      });
+    }
+    
+    // Update session
+    const updatedUser = await User.findById(req.session.user._id);
     req.session.user.isPremium = true;
-    
-    // Create notification
-    await Notification.create({
-      userId: req.session.user._id,
-      title: 'Premium Activated!',
-      message: 'Your premium subscription is now active!',
-      type: 'success'
-    });
+    req.session.user.premiumTier = updatedUser.premiumTier;
     
     res.json({
       success: true,
       message: 'Payment processed successfully',
-      payment
+      payment,
+      premiumExpiry: updatedUser.premiumExpiry
     });
   } catch (error) {
+    console.error('Payment processing error:', error);
     res.status(500).json({
       success: false,
       message: 'Error processing payment'

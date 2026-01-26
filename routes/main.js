@@ -13,6 +13,7 @@ const Content = require('../models/Content');
 const Notification = require('../models/Notification');
 const WatchRoom = require('../models/WatchRoom');
 const WatchSession = require('../models/WatchSession');
+const { processPremiumUpgrade } = require('../utils/premiumHelper');
 
 // Apply banned check to all routes
 router.use(checkBanned);
@@ -216,33 +217,51 @@ router.post('/purchase/process', isAuthenticated, async (req, res) => {
   try {
     const { plan, amount } = req.body;
     
+    // Map plan to tier and duration
+    const tierMap = {
+      'monthly': { tier: 'basic', days: 30, price: 9.99 },
+      'yearly': { tier: 'basic', days: 365, price: 99.99 },
+      'pro-monthly': { tier: 'pro', days: 30, price: 19.99 },
+      'pro-yearly': { tier: 'pro', days: 365, price: 199.99 }
+    };
+    
+    const planDetails = tierMap[plan] || { tier: 'basic', days: 30, price: 9.99 };
+    
     // For demo purposes, create a demo payment
     // In production, this would integrate with Stripe/PayPal
+    const transactionId = `DEMO-${Date.now()}-${req.session.user._id}`;
+    
     const payment = await Payment.create({
       userId: req.session.user._id,
-      amount: parseFloat(amount),
+      amount: parseFloat(amount) || planDetails.price,
       currency: 'USD',
       paymentMethod: 'demo',
-      transactionId: `DEMO-${Date.now()}`,
+      transactionId: transactionId,
       status: 'completed',
+      description: `${planDetails.tier.toUpperCase()} Premium - ${planDetails.days} days`,
+      premiumTier: planDetails.tier,
+      premiumDuration: planDetails.days,
       metadata: { plan }
     });
     
-    // Update user to premium
-    await User.findByIdAndUpdate(req.session.user._id, { isPremium: true });
-    req.session.user.isPremium = true;
+    // Process premium upgrade
+    const upgraded = await processPremiumUpgrade(payment);
     
-    // Create notification
-    await Notification.create({
-      userId: req.session.user._id,
-      title: 'Premium Activated!',
-      message: `Your ${plan} premium subscription is now active. Enjoy all premium features!`,
-      type: 'success'
-    });
+    if (!upgraded.success) {
+      req.session.message = upgraded.message;
+      req.session.messageType = 'error';
+      return res.redirect('/purchase');
+    }
+    
+    // Update session
+    const updatedUser = await User.findById(req.session.user._id);
+    req.session.user.isPremium = true;
+    req.session.user.premiumTier = updatedUser.premiumTier;
     
     res.render('purchase-success', {
       pageTitle: 'Payment Successful - SUB4SUB',
-      transaction: payment
+      transaction: payment,
+      premiumExpiry: updatedUser.premiumExpiry
     });
   } catch (error) {
     console.error('Purchase error:', error);

@@ -94,6 +94,7 @@ exports.awardSignupBonus = async (referral) => {
 
 /**
  * Award first purchase bonus when referee makes first payment
+ * Implements 30-day delay to protect against chargebacks
  */
 exports.awardFirstPurchaseBonus = async (userId) => {
   try {
@@ -103,6 +104,13 @@ exports.awardFirstPurchaseBonus = async (userId) => {
     });
     
     if (!referral) return;
+    
+    // Check if 30 days have passed since purchase (chargeback protection)
+    const daysSincePurchase = Math.floor((Date.now() - referral.createdAt) / (1000 * 60 * 60 * 24));
+    if (daysSincePurchase < 30) {
+      console.log(`Referral purchase bonus delayed: User ${userId}, ${30 - daysSincePurchase} days remaining`);
+      return; // Will be processed by scheduled job after 30 days
+    }
     
     const referrer = await User.findById(referral.referrerId);
     if (!referrer) return;
