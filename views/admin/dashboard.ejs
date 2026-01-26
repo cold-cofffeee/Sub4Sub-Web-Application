@@ -1,0 +1,213 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
+      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white active" href="/admin/dashboard">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/users">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a class="nav-link text-white" href="/admin/verify-users">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a class="nav-link text-white" href="/admin/payments">
+          <i class="fas fa-dollar-sign me-2"></i>Payments
+        </a>
+        <a class="nav-link text-white" href="/admin/content">
+          <i class="fas fa-file-alt me-2"></i>Content
+        </a>
+        <a class="nav-link text-white" href="/admin/settings">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+        <hr class="bg-white">
+        <a class="nav-link text-white" href="/">
+          <i class="fas fa-home me-2"></i>Back to Site
+        </a>
+        <a class="nav-link text-white" href="/auth/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10">
+      <h2 class="mb-4">Dashboard</h2>
+
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card text-white bg-primary">
+            <div class="card-body">
+              <h3><%= stats.totalUsers %></h3>
+              <p class="mb-0"><i class="fas fa-users me-2"></i>Total Users</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-success">
+            <div class="card-body">
+              <h3><%= stats.premiumUsers %></h3>
+              <p class="mb-0"><i class="fas fa-crown me-2"></i>Premium Users</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-info">
+            <div class="card-body">
+              <h3><%= stats.totalSubscriptions %></h3>
+              <p class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Subscriptions</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-warning">
+            <div class="card-body">
+              <h3>$<%= stats.totalRevenue.toFixed(2) %></h3>
+              <p class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Revenue</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Recent Users</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (recentUsers && recentUsers.length > 0) { %>
+                      <% recentUsers.forEach(user => { %>
+                        <tr>
+                          <td><%= user.username %></td>
+                          <td><%= user.email %></td>
+                          <td>
+                            <% if (user.isPremium) { %>
+                              <span class="badge bg-success">Premium</span>
+                            <% } else { %>
+                              <span class="badge bg-secondary">Free</span>
+                            <% } %>
+                          </td>
+                          <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="4" class="text-center text-muted">No users yet</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Recent Payments</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (recentPayments && recentPayments.length > 0) { %>
+                      <% recentPayments.forEach(payment => { %>
+                        <tr>
+                          <td><%= payment.userId ? payment.userId.username : 'N/A' %></td>
+                          <td>$<%= payment.amount %></td>
+                          <td>
+                            <% if (payment.status === 'completed') { %>
+                              <span class="badge bg-success">Paid</span>
+                            <% } else { %>
+                              <span class="badge bg-warning">Pending</span>
+                            <% } %>
+                          </td>
+                          <td><%= new Date(payment.createdAt).toLocaleDateString() %></td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="4" class="text-center text-muted">No payments yet</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Verifications -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Pending Subscription Verifications</h5>
+              <span class="badge bg-warning"><%= stats.pendingVerifications %></span>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Channel</th>
+                      <th>Target</th>
+                      <th>Submitted</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (pendingSubscriptions && pendingSubscriptions.length > 0) { %>
+                      <% pendingSubscriptions.forEach(sub => { %>
+                        <tr>
+                          <td><%= sub.userId ? sub.userId.username : 'N/A' %></td>
+                          <td><%= sub.channelName %></td>
+                          <td><%= sub.targetUserId ? sub.targetUserId.username : 'N/A' %></td>
+                          <td><%= new Date(sub.createdAt).toLocaleString() %></td>
+                          <td>
+                            <a href="/admin/verify-users" class="btn btn-sm btn-primary">
+                              <i class="fas fa-eye me-1"></i>Review
+                            </a>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="5" class="text-center text-muted">No pending verifications</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

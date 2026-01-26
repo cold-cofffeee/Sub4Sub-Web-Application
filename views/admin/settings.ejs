@@ -1,0 +1,260 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
+      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white" href="/admin/dashboard">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/users">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a class="nav-link text-white" href="/admin/verify-users">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a class="nav-link text-white" href="/admin/payments">
+          <i class="fas fa-dollar-sign me-2"></i>Payments
+        </a>
+        <a class="nav-link text-white" href="/admin/content">
+          <i class="fas fa-file-alt me-2"></i>Content
+        </a>
+        <a class="nav-link text-white active" href="/admin/settings">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+        <hr class="bg-white">
+        <a class="nav-link text-white" href="/">
+          <i class="fas fa-home me-2"></i>Back to Site
+        </a>
+        <a class="nav-link text-white" href="/auth/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10">
+      <h2 class="mb-4">System Settings</h2>
+
+      <!-- Application Settings -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Application Settings</h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/settings/app" method="POST">
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Site Name</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" name="siteName" value="<%= settings.siteName || 'SUB4SUB' %>">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Site Description</label>
+              <div class="col-sm-9">
+                <textarea class="form-control" name="siteDescription" rows="3"><%= settings.siteDescription || 'YouTube Subscription Exchange Platform' %></textarea>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Contact Email</label>
+              <div class="col-sm-9">
+                <input type="email" class="form-control" name="contactEmail" value="<%= settings.contactEmail || 'admin@sub4sub.com' %>">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Maintenance Mode</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="maintenanceMode" <%= settings.maintenanceMode ? 'checked' : '' %>>
+                  <label class="form-check-label">Enable maintenance mode</label>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Points & Rewards -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-coins me-2"></i>Points & Rewards Settings</h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/settings/points" method="POST">
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Points Per Subscription</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="pointsPerSub" value="<%= settings.pointsPerSub || 10 %>" min="1">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Daily Free Points Limit</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="dailyFreeLimit" value="<%= settings.dailyFreeLimit || 50 %>" min="1">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Daily Premium Points Limit</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="dailyPremiumLimit" value="<%= settings.dailyPremiumLimit || 500 %>" min="1">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Signup Bonus Points</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="signupBonus" value="<%= settings.signupBonus || 100 %>" min="0">
+              </div>
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Payment Settings -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Settings</h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/settings/payment" method="POST">
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Enable Stripe</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="enableStripe" <%= settings.enableStripe ? 'checked' : '' %>>
+                  <label class="form-check-label">Accept Stripe payments</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Enable PayPal</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="enablePayPal" <%= settings.enablePayPal ? 'checked' : '' %>>
+                  <label class="form-check-label">Accept PayPal payments</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Monthly Premium Price</label>
+              <div class="col-sm-9">
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="monthlyPrice" value="<%= settings.monthlyPrice || 9.99 %>" step="0.01" min="0">
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Yearly Premium Price</label>
+              <div class="col-sm-9">
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="yearlyPrice" value="<%= settings.yearlyPrice || 99.99 %>" step="0.01" min="0">
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Settings</h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/settings/security" method="POST">
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Enable Registration</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="enableRegistration" <%= settings.enableRegistration !== false ? 'checked' : '' %>>
+                  <label class="form-check-label">Allow new user registrations</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Email Verification Required</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" name="requireEmailVerification" <%= settings.requireEmailVerification ? 'checked' : '' %>>
+                  <label class="form-check-label">Require email verification for new accounts</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Max Login Attempts</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="maxLoginAttempts" value="<%= settings.maxLoginAttempts || 5 %>" min="1">
+                <div class="form-text">Lock account after this many failed login attempts</div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label">Session Timeout (hours)</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" name="sessionTimeout" value="<%= settings.sessionTimeout || 24 %>" min="1">
+              </div>
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- System Information -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>System Information</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-3">Version:</dt>
+            <dd class="col-sm-9">2.0.0</dd>
+            
+            <dt class="col-sm-3">Node.js Version:</dt>
+            <dd class="col-sm-9"><%= process.version %></dd>
+            
+            <dt class="col-sm-3">Environment:</dt>
+            <dd class="col-sm-9"><%= process.env.NODE_ENV || 'development' %></dd>
+            
+            <dt class="col-sm-3">Uptime:</dt>
+            <dd class="col-sm-9"><%= Math.floor(process.uptime() / 60) %> minutes</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

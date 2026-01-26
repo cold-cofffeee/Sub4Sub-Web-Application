@@ -1,0 +1,159 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
+      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white" href="/admin/dashboard">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/users">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a class="nav-link text-white active" href="/admin/verify-users">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a class="nav-link text-white" href="/admin/payments">
+          <i class="fas fa-dollar-sign me-2"></i>Payments
+        </a>
+        <a class="nav-link text-white" href="/admin/content">
+          <i class="fas fa-file-alt me-2"></i>Content
+        </a>
+        <a class="nav-link text-white" href="/admin/settings">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+        <hr class="bg-white">
+        <a class="nav-link text-white" href="/">
+          <i class="fas fa-home me-2"></i>Back to Site
+        </a>
+        <a class="nav-link text-white" href="/auth/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10">
+      <h2 class="mb-4">
+        Verify Subscriptions
+        <span class="badge bg-warning ms-2"><%= subscriptions.length %> Pending</span>
+      </h2>
+
+      <!-- Filter -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form class="row g-3" method="GET">
+            <div class="col-md-4">
+              <select class="form-select" name="status" onchange="this.form.submit()">
+                <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="verified" <%= status === 'verified' ? 'selected' : '' %>>Verified</option>
+                <option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                <option value="all" <%= status === 'all' ? 'selected' : '' %>>All</option>
+              </select>
+            </div>
+            <div class="col-md-8 text-end">
+              <span class="text-muted">Total: <%= totalSubscriptions %></span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Subscriptions Table -->
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Channel Name</th>
+                  <th>Channel URL</th>
+                  <th>Target User</th>
+                  <th>Points</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (subscriptions && subscriptions.length > 0) { %>
+                  <% subscriptions.forEach(sub => { %>
+                    <tr>
+                      <td><%= sub.userId ? sub.userId.username : 'N/A' %></td>
+                      <td><%= sub.channelName %></td>
+                      <td>
+                        <a href="<%= sub.channelUrl %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                          <i class="fab fa-youtube me-1"></i>View
+                        </a>
+                      </td>
+                      <td><%= sub.targetUserId ? sub.targetUserId.username : 'N/A' %></td>
+                      <td><%= sub.pointsAwarded %></td>
+                      <td>
+                        <% if (sub.status === 'pending') { %>
+                          <span class="badge bg-warning">Pending</span>
+                        <% } else if (sub.status === 'verified') { %>
+                          <span class="badge bg-success">Verified</span>
+                        <% } else { %>
+                          <span class="badge bg-danger">Rejected</span>
+                        <% } %>
+                      </td>
+                      <td><%= new Date(sub.createdAt).toLocaleString() %></td>
+                      <td>
+                        <% if (sub.status === 'pending') { %>
+                          <div class="btn-group" role="group">
+                            <form action="/admin/subscriptions/<%= sub._id %>/verify" method="POST" class="d-inline">
+                              <button type="submit" class="btn btn-sm btn-success" title="Verify">
+                                <i class="fas fa-check"></i>
+                              </button>
+                            </form>
+                            <form action="/admin/subscriptions/<%= sub._id %>/reject" method="POST" class="d-inline">
+                              <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                <i class="fas fa-times"></i>
+                              </button>
+                            </form>
+                          </div>
+                        <% } else { %>
+                          <span class="text-muted">-</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                      <i class="fas fa-check-circle fa-3x mb-3 d-block"></i>
+                      No subscriptions to verify
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <% if (totalPages > 1) { %>
+            <nav>
+              <ul class="pagination justify-content-center">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage - 1 %>&status=<%= status %>">Previous</a>
+                </li>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&status=<%= status %>"><%= i %></a>
+                  </li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage + 1 %>&status=<%= status %>">Next</a>
+                </li>
+              </ul>
+            </nav>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

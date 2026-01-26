@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2><i class="fas fa-bell me-2"></i>Notifications</h2>
+      <p class="text-muted">Stay updated with your latest activities</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <% if (notifications && notifications.length > 0) { %>
+        <% notifications.forEach(notification => { %>
+          <div class="card mb-3 <%= notification.isRead ? '' : 'border-primary' %>">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h5 class="card-title">
+                    <% if (notification.type === 'success') { %>
+                      <i class="fas fa-check-circle text-success me-2"></i>
+                    <% } else if (notification.type === 'warning') { %>
+                      <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    <% } else if (notification.type === 'error') { %>
+                      <i class="fas fa-times-circle text-danger me-2"></i>
+                    <% } else { %>
+                      <i class="fas fa-info-circle text-info me-2"></i>
+                    <% } %>
+                    <%= notification.title %>
+                    <% if (!notification.isRead) { %>
+                      <span class="badge bg-primary ms-2">New</span>
+                    <% } %>
+                  </h5>
+                  <p class="card-text"><%= notification.message %></p>
+                  <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    <%= new Date(notification.createdAt).toLocaleString() %>
+                  </small>
+                </div>
+                <div class="ms-3">
+                  <% if (!notification.isRead) { %>
+                    <form action="/notification/mark-read/<%= notification._id %>" method="POST" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-outline-primary" title="Mark as read">
+                        <i class="fas fa-check"></i>
+                      </button>
+                    </form>
+                  <% } %>
+                  <form action="/notification/delete/<%= notification._id %>" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <% if (notification.actionUrl) { %>
+                <a href="<%= notification.actionUrl %>" class="btn btn-sm btn-primary mt-2">
+                  View Details <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+
+        <div class="d-flex justify-content-between mt-4">
+          <form action="/notification/mark-all-read" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="fas fa-check-double me-1"></i> Mark All as Read
+            </button>
+          </form>
+          <form action="/notification/clear-all" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger">
+              <i class="fas fa-trash-alt me-1"></i> Clear All
+            </button>
+          </form>
+        </div>
+      <% } else { %>
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+            <h4>No Notifications</h4>
+            <p class="text-muted">You're all caught up! No new notifications.</p>
+            <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

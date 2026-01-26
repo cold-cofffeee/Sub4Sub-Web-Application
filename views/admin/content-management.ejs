@@ -1,0 +1,174 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
+      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white" href="/admin/dashboard">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/users">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a class="nav-link text-white" href="/admin/verify-users">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a class="nav-link text-white" href="/admin/payments">
+          <i class="fas fa-dollar-sign me-2"></i>Payments
+        </a>
+        <a class="nav-link text-white active" href="/admin/content">
+          <i class="fas fa-file-alt me-2"></i>Content
+        </a>
+        <a class="nav-link text-white" href="/admin/settings">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+        <hr class="bg-white">
+        <a class="nav-link text-white" href="/">
+          <i class="fas fa-home me-2"></i>Back to Site
+        </a>
+        <a class="nav-link text-white" href="/auth/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10">
+      <h2 class="mb-4">Content Management</h2>
+
+      <!-- Page Tabs -->
+      <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'about' ? 'active' : '' %>" href="?page=about">About Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'faq' ? 'active' : '' %>" href="?page=faq">FAQ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'privacy' ? 'active' : '' %>" href="?page=privacy">Privacy Policy</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'tos' ? 'active' : '' %>" href="?page=tos">Terms of Service</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= page === 'contact' ? 'active' : '' %>" href="?page=contact">Contact Info</a>
+        </li>
+      </ul>
+
+      <!-- Edit Form -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            Edit <%= page ? page.charAt(0).toUpperCase() + page.slice(1) : 'Content' %>
+            <% if (content && content.version) { %>
+              <span class="badge bg-secondary ms-2">Version <%= content.version %></span>
+            <% } %>
+          </h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/content/<%= page %>" method="POST">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="title" 
+                name="title" 
+                value="<%= content ? content.title : '' %>" 
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="content" class="form-label">Content</label>
+              <textarea 
+                class="form-control" 
+                id="content" 
+                name="content" 
+                rows="15" 
+                required
+              ><%= content ? content.content : '' %></textarea>
+              <div class="form-text">
+                You can use HTML tags for formatting
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="isActive" 
+                  name="isActive" 
+                  <%= content && content.isActive ? 'checked' : '' %>
+                >
+                <label class="form-check-label" for="isActive">
+                  Page is Active (visible to users)
+                </label>
+              </div>
+            </div>
+
+            <% if (content && content.updatedAt) { %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Last updated: <%= new Date(content.updatedAt).toLocaleString() %>
+              </div>
+            <% } %>
+
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Save Changes
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="window.open('/content/<%= page %>', '_blank')">
+                <i class="fas fa-eye me-2"></i>Preview
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Content Preview -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="mb-0">Live Preview</h5>
+        </div>
+        <div class="card-body">
+          <h3><%= content ? content.title : 'No Title' %></h3>
+          <hr>
+          <div id="preview">
+            <%= content ? content.content : 'No content available' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Version History -->
+      <% if (content && content.version > 1) { %>
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0">Version History</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <i class="fas fa-history me-2"></i>
+              This page has been updated <%= content.version %> times
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Simple live preview
+  const contentTextarea = document.getElementById('content');
+  const previewDiv = document.getElementById('preview');
+  
+  contentTextarea.addEventListener('input', function() {
+    previewDiv.innerHTML = this.value;
+  });
+</script>
+
+<%- include('../partials/footer') %>

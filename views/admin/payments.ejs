@@ -1,0 +1,232 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
+      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
+      <nav class="nav flex-column">
+        <a class="nav-link text-white" href="/admin/dashboard">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a class="nav-link text-white" href="/admin/users">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a class="nav-link text-white" href="/admin/verify-users">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a class="nav-link text-white active" href="/admin/payments">
+          <i class="fas fa-dollar-sign me-2"></i>Payments
+        </a>
+        <a class="nav-link text-white" href="/admin/content">
+          <i class="fas fa-file-alt me-2"></i>Content
+        </a>
+        <a class="nav-link text-white" href="/admin/settings">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+        <hr class="bg-white">
+        <a class="nav-link text-white" href="/">
+          <i class="fas fa-home me-2"></i>Back to Site
+        </a>
+        <a class="nav-link text-white" href="/auth/logout">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10">
+      <h2 class="mb-4">Payment Management</h2>
+
+      <!-- Summary Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <h3>$<%= totalRevenue.toFixed(2) %></h3>
+              <p class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Total Revenue</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h3><%= totalPayments %></h3>
+              <p class="mb-0"><i class="fas fa-receipt me-2"></i>Total Payments</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-info text-white">
+            <div class="card-body">
+              <h3>$<%= monthlyRevenue.toFixed(2) %></h3>
+              <p class="mb-0"><i class="fas fa-calendar me-2"></i>This Month</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-warning text-white">
+            <div class="card-body">
+              <h3><%= pendingPayments %></h3>
+              <p class="mb-0"><i class="fas fa-clock me-2"></i>Pending</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form class="row g-3" method="GET">
+            <div class="col-md-3">
+              <select class="form-select" name="status">
+                <option value="">All Statuses</option>
+                <option value="completed" <%= status === 'completed' ? 'selected' : '' %>>Completed</option>
+                <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="failed" <%= status === 'failed' ? 'selected' : '' %>>Failed</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" name="method">
+                <option value="">All Methods</option>
+                <option value="stripe" <%= method === 'stripe' ? 'selected' : '' %>>Stripe</option>
+                <option value="paypal" <%= method === 'paypal' ? 'selected' : '' %>>PayPal</option>
+                <option value="demo" <%= method === 'demo' ? 'selected' : '' %>>Demo</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="search" placeholder="Search user..." value="<%= search || '' %>">
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i>Filter
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Payments Table -->
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>User</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (payments && payments.length > 0) { %>
+                  <% payments.forEach(payment => { %>
+                    <tr>
+                      <td><code><%= payment.transactionId %></code></td>
+                      <td>
+                        <%= payment.userId ? payment.userId.username : 'N/A' %>
+                        <br><small class="text-muted"><%= payment.userId ? payment.userId.email : '' %></small>
+                      </td>
+                      <td><strong>$<%= payment.amount %></strong> <%= payment.currency %></td>
+                      <td>
+                        <% if (payment.paymentMethod === 'stripe') { %>
+                          <span class="badge bg-primary"><i class="fab fa-stripe me-1"></i>Stripe</span>
+                        <% } else if (payment.paymentMethod === 'paypal') { %>
+                          <span class="badge bg-info"><i class="fab fa-paypal me-1"></i>PayPal</span>
+                        <% } else { %>
+                          <span class="badge bg-secondary">Demo</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (payment.status === 'completed') { %>
+                          <span class="badge bg-success">Completed</span>
+                        <% } else if (payment.status === 'pending') { %>
+                          <span class="badge bg-warning">Pending</span>
+                        <% } else { %>
+                          <span class="badge bg-danger">Failed</span>
+                        <% } %>
+                      </td>
+                      <td><%= new Date(payment.createdAt).toLocaleString() %></td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal<%= payment._id %>">
+                          <i class="fas fa-eye me-1"></i>Details
+                        </button>
+                      </td>
+                    </tr>
+
+                    <!-- Detail Modal -->
+                    <div class="modal fade" id="detailModal<%= payment._id %>" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Payment Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <dl class="row">
+                              <dt class="col-sm-4">Transaction ID:</dt>
+                              <dd class="col-sm-8"><code><%= payment.transactionId %></code></dd>
+                              
+                              <dt class="col-sm-4">User:</dt>
+                              <dd class="col-sm-8"><%= payment.userId ? payment.userId.username : 'N/A' %></dd>
+                              
+                              <dt class="col-sm-4">Amount:</dt>
+                              <dd class="col-sm-8">$<%= payment.amount %> <%= payment.currency %></dd>
+                              
+                              <dt class="col-sm-4">Method:</dt>
+                              <dd class="col-sm-8"><%= payment.paymentMethod %></dd>
+                              
+                              <dt class="col-sm-4">Status:</dt>
+                              <dd class="col-sm-8"><%= payment.status %></dd>
+                              
+                              <dt class="col-sm-4">Date:</dt>
+                              <dd class="col-sm-8"><%= new Date(payment.createdAt).toLocaleString() %></dd>
+                              
+                              <% if (payment.metadata) { %>
+                                <dt class="col-sm-4">Metadata:</dt>
+                                <dd class="col-sm-8"><pre><%= JSON.stringify(payment.metadata, null, 2) %></pre></dd>
+                              <% } %>
+                            </dl>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No payments found</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <% if (totalPages > 1) { %>
+            <nav>
+              <ul class="pagination justify-content-center">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage - 1 %>&status=<%= status || '' %>&method=<%= method || '' %>&search=<%= search || '' %>">Previous</a>
+                </li>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&status=<%= status || '' %>&method=<%= method || '' %>&search=<%= search || '' %>"><%= i %></a>
+                  </li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="?page=<%= currentPage + 1 %>&status=<%= status || '' %>&method=<%= method || '' %>&search=<%= search || '' %>">Next</a>
+                </li>
+              </ul>
+            </nav>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

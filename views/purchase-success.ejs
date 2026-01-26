@@ -1,0 +1,65 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card shadow-lg">
+        <div class="card-body text-center py-5">
+          <div class="mb-4">
+            <i class="fas fa-check-circle fa-5x text-success"></i>
+          </div>
+          <h2 class="mb-3">Payment Successful!</h2>
+          <p class="lead text-muted mb-4">
+            Thank you for upgrading to Premium. Your account has been activated with premium features.
+          </p>
+
+          <div class="alert alert-success mb-4">
+            <h5 class="alert-heading"><i class="fas fa-crown me-2"></i>Welcome to Premium!</h5>
+            <p class="mb-0">You now have access to all premium features including increased daily points, priority support, and advanced analytics.</p>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="text-muted mb-2">Transaction ID</h6>
+                  <p class="mb-0"><strong><%= transaction ? transaction.transactionId : 'N/A' %></strong></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="text-muted mb-2">Amount Paid</h6>
+                  <p class="mb-0"><strong>$<%= transaction ? transaction.amount : '0.00' %></strong></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-muted mb-4">
+            <i class="fas fa-envelope me-2"></i>
+            A confirmation email has been sent to your registered email address.
+          </p>
+
+          <div class="d-grid gap-2">
+            <a href="/account" class="btn btn-primary btn-lg">
+              <i class="fas fa-user me-2"></i>Go to My Account
+            </a>
+            <a href="/exchange" class="btn btn-outline-primary">
+              <i class="fas fa-exchange-alt me-2"></i>Start Exchanging
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <p class="text-muted">
+          Need help? <a href="/content/contact">Contact our support team</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

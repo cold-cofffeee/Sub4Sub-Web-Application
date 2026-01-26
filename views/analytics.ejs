@@ -1,0 +1,137 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2><i class="fas fa-chart-line me-2"></i>Analytics</h2>
+      <p class="text-muted">Track your growth and performance</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="fas fa-users fa-2x text-primary mb-2"></i>
+          <h5 class="card-title"><%= stats.totalSubscriptions %></h5>
+          <p class="card-text text-muted">Total Subscriptions</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+          <h5 class="card-title"><%= stats.verifiedSubscriptions %></h5>
+          <p class="card-text text-muted">Verified</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+          <h5 class="card-title"><%= stats.pendingSubscriptions %></h5>
+          <p class="card-text text-muted">Pending</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="fas fa-coins fa-2x text-info mb-2"></i>
+          <h5 class="card-title"><%= user.points %></h5>
+          <p class="card-text text-muted">Your Points</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Subscription Activity (Last 30 Days)</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="activityChart" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Recent Activity</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Channel</th>
+                  <th>Status</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (recentSubscriptions && recentSubscriptions.length > 0) { %>
+                  <% recentSubscriptions.forEach(subscription => { %>
+                    <tr>
+                      <td><%= new Date(subscription.createdAt).toLocaleDateString() %></td>
+                      <td><%= subscription.channelName %></td>
+                      <td>
+                        <% if (subscription.status === 'verified') { %>
+                          <span class="badge bg-success">Verified</span>
+                        <% } else if (subscription.status === 'pending') { %>
+                          <span class="badge bg-warning">Pending</span>
+                        <% } else { %>
+                          <span class="badge bg-danger">Rejected</span>
+                        <% } %>
+                      </td>
+                      <td><%= subscription.pointsAwarded %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">No activity yet</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+  // Simple chart for demonstration
+  const ctx = document.getElementById('activityChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      datasets: [{
+        label: 'Subscriptions',
+        data: [<%= stats.verifiedSubscriptions * 0.2 %>, <%= stats.verifiedSubscriptions * 0.5 %>, <%= stats.verifiedSubscriptions * 0.8 %>, <%= stats.verifiedSubscriptions %>],
+        borderColor: '#0d6efd',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

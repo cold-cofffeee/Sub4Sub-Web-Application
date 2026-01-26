@@ -1,0 +1,168 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2><i class="fas fa-shopping-cart me-2"></i>Purchase Premium</h2>
+      <p class="text-muted">Upgrade your account and get exclusive features</p>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-3">
+    <!-- Free Plan -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-light text-center">
+          <h4>Free</h4>
+          <h2 class="mb-0">$0</h2>
+          <small class="text-muted">Forever</small>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>50 Points per day</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic Support</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Standard Features</li>
+            <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Priority Queue</li>
+            <li class="mb-2"><i class="fas fa-times text-danger me-2"></i>Advanced Analytics</li>
+          </ul>
+        </div>
+        <div class="card-footer text-center">
+          <button class="btn btn-outline-secondary" disabled>Current Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Monthly -->
+    <div class="col-md-4">
+      <div class="card h-100 border-primary">
+        <div class="card-header bg-primary text-white text-center">
+          <h4>Premium</h4>
+          <h2 class="mb-0">$9.99</h2>
+          <small>Per Month</small>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>500 Points per day</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority Support</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>All Features</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority Queue</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Analytics</li>
+          </ul>
+        </div>
+        <div class="card-footer text-center">
+          <form action="/purchase/process" method="POST">
+            <input type="hidden" name="plan" value="monthly">
+            <input type="hidden" name="amount" value="9.99">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-crown me-2"></i>Upgrade Now
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Yearly -->
+    <div class="col-md-4">
+      <div class="card h-100 border-success">
+        <div class="card-header bg-success text-white text-center">
+          <span class="badge bg-warning text-dark mb-2">Best Value</span>
+          <h4>Premium Yearly</h4>
+          <h2 class="mb-0">$99.99</h2>
+          <small>Per Year (Save 17%)</small>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>1000 Points per day</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Premium Support</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>All Features</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority Queue</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Analytics</li>
+            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Exclusive Badge</li>
+          </ul>
+        </div>
+        <div class="card-footer text-center">
+          <form action="/purchase/process" method="POST">
+            <input type="hidden" name="plan" value="yearly">
+            <input type="hidden" name="amount" value="99.99">
+            <button type="submit" class="btn btn-success w-100">
+              <i class="fas fa-star me-2"></i>Get Best Deal
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="mb-3">We Accept</h5>
+          <div class="d-flex justify-content-center gap-3">
+            <i class="fab fa-cc-visa fa-3x text-primary"></i>
+            <i class="fab fa-cc-mastercard fa-3x text-danger"></i>
+            <i class="fab fa-cc-paypal fa-3x text-info"></i>
+            <i class="fab fa-cc-stripe fa-3x text-primary"></i>
+          </div>
+          <p class="text-muted mt-3 mb-0">
+            <i class="fas fa-lock me-1"></i>Secure payment processing with 256-bit encryption
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Frequently Asked Questions</h5>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                  Can I cancel my subscription anytime?
+                </button>
+              </h2>
+              <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Yes, you can cancel your subscription at any time. Your premium features will remain active until the end of your billing period.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                  Is my payment information secure?
+                </button>
+              </h2>
+              <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Absolutely! We use industry-standard encryption and work with trusted payment processors like Stripe and PayPal. We never store your credit card information.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                  What happens if I upgrade mid-cycle?
+                </button>
+              </h2>
+              <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Your new plan will take effect immediately, and you'll be charged a prorated amount for the remainder of your billing cycle.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

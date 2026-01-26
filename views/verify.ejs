@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card shadow">
+        <div class="card-body text-center py-5">
+          <% if (success) { %>
+            <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+            <h2 class="mb-3">Email Verified!</h2>
+            <p class="lead text-muted mb-4">
+              Your email has been successfully verified. You can now access all features of your account.
+            </p>
+            <a href="/auth/login" class="btn btn-primary btn-lg">
+              <i class="fas fa-sign-in-alt me-2"></i>Login to Your Account
+            </a>
+          <% } else { %>
+            <i class="fas fa-times-circle fa-5x text-danger mb-4"></i>
+            <h2 class="mb-3">Verification Failed</h2>
+            <p class="lead text-muted mb-4">
+              <%= message || 'The verification link is invalid or has expired.' %>
+            </p>
+            <div class="d-grid gap-2">
+              <a href="/auth/resend-verification" class="btn btn-primary">
+                <i class="fas fa-envelope me-2"></i>Resend Verification Email
+              </a>
+              <a href="/auth/login" class="btn btn-outline-secondary">
+                Back to Login
+              </a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
