@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h2 class="mb-4"><i class="fas fa-envelope me-2"></i>Contact Us</h2>
+      
+      <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+              <h5>Email</h5>
+              <p class="text-muted">support@sub4sub.com</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="fas fa-phone fa-3x text-success mb-3"></i>
+              <h5>Phone</h5>
+              <p class="text-muted">+1 (555) 123-4567</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <i class="fas fa-clock fa-3x text-info mb-3"></i>
+              <h5>Hours</h5>
+              <p class="text-muted">24/7 Support</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Send us a Message</h4>
+          
+          <form action="/contact" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">Your Name</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                name="name" 
+                placeholder="John Doe" 
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                name="email" 
+                placeholder="your@email.com" 
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="subject" class="form-label">Subject</label>
+              <select class="form-select" id="subject" name="subject" required>
+                <option value="">Select a topic...</option>
+                <option value="general">General Inquiry</option>
+                <option value="support">Technical Support</option>
+                <option value="billing">Billing Question</option>
+                <option value="bug">Report a Bug</option>
+                <option value="feature">Feature Request</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="message" class="form-label">Message</label>
+              <textarea 
+                class="form-control" 
+                id="message" 
+                name="message" 
+                rows="6" 
+                placeholder="Tell us how we can help you..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>Send Message
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h5>
+          <p class="mb-2"><strong>Q: How long does it take to get a response?</strong></p>
+          <p class="text-muted mb-3">We typically respond within 24 hours during business days.</p>
+          
+          <p class="mb-2"><strong>Q: Can I get help with my account issues?</strong></p>
+          <p class="text-muted mb-3">Yes! Please select "Technical Support" as your subject and provide your account details.</p>
+          
+          <p class="mb-2"><strong>Q: Do you offer phone support?</strong></p>
+          <p class="text-muted mb-0">Premium members have access to priority phone support. Free users can contact us via email.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

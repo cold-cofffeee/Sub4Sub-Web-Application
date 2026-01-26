@@ -103,7 +103,7 @@
                       <td>
                         <% if (sub.status === 'pending') { %>
                           <div class="btn-group" role="group">
-                            <form action="/admin/subscriptions/<%= sub._id %>/verify" method="POST" class="d-inline">
+                            <form action="/admin/subscriptions/<%= sub._id %>/approve" method="POST" class="d-inline">
                               <button type="submit" class="btn btn-sm btn-success" title="Verify">
                                 <i class="fas fa-check"></i>
                               </button>

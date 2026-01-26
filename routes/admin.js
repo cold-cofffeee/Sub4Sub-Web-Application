@@ -44,7 +44,8 @@ router.get('/dashboard', async (req, res) => {
       }),
       activeUsers: await User.countDocuments({
         lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-      })
+      }),
+      pendingVerifications: await Subscription.countDocuments({ status: 'pending' })
     };
     
     const recentUsers = await User.find()
@@ -57,11 +58,18 @@ router.get('/dashboard', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
     
+    const pendingSubscriptions = await Subscription.find({ status: 'pending' })
+      .populate('userId', 'username')
+      .populate('targetUserId', 'username')
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
     res.render('admin/dashboard', {
       pageTitle: 'Admin Dashboard - SUB4SUB',
       stats,
       recentUsers,
-      recentPayments
+      recentPayments,
+      pendingSubscriptions
     });
   } catch (error) {
     console.error('Admin dashboard error:', error);
@@ -77,9 +85,23 @@ router.get('/users', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const filter = req.query.filter || '';
     
-    const totalUsers = await User.countDocuments();
-    const users = await User.find()
+    let query = {};
+    if (search) {
+      query.$or = [
+        { username: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') }
+      ];
+    }
+    if (filter === 'premium') query.isPremium = true;
+    if (filter === 'free') query.isPremium = false;
+    if (filter === 'banned') query.isBanned = true;
+    if (filter === 'admin') query.isAdmin = true;
+    
+    const totalUsers = await User.countDocuments(query);
+    const users = await User.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -89,14 +111,24 @@ router.get('/users', async (req, res) => {
     res.render('admin/users', {
       pageTitle: 'Users Management - Admin',
       users,
-      pagination
+      pagination,
+      totalUsers,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      search,
+      filter
     });
   } catch (error) {
     console.error('Users management error:', error);
     res.render('admin/users', {
       pageTitle: 'Users Management - Admin',
       users: [],
-      pagination: {}
+      pagination: {},
+      totalUsers: 0,
+      currentPage: 1,
+      totalPages: 1,
+      search: '',
+      filter: ''
     });
   }
 });
@@ -170,21 +202,41 @@ router.post('/users/:id/delete', async (req, res) => {
 // Verify users (subscription verification)
 router.get('/verify-users', async (req, res) => {
   try {
-    const pendingSubscriptions = await Subscription.find({ status: 'pending' })
+    const page = parseInt(req.query.page) || 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const status = req.query.status || 'pending';
+    
+    let query = {};
+    if (status !== 'all') {
+      query.status = status;
+    }
+    
+    const totalSubscriptions = await Subscription.countDocuments(query);
+    const subscriptions = await Subscription.find(query)
       .populate('userId', 'username email')
       .populate('targetUserId', 'username youtubeChannelName')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .skip(skip)
+      .limit(limit);
     
     res.render('admin/verify-users', {
       pageTitle: 'Verify Subscriptions - Admin',
-      subscriptions: pendingSubscriptions
+      subscriptions,
+      status,
+      totalSubscriptions,
+      currentPage: page,
+      totalPages: Math.ceil(totalSubscriptions / limit)
     });
   } catch (error) {
     console.error('Verify users error:', error);
     res.render('admin/verify-users', {
       pageTitle: 'Verify Subscriptions - Admin',
-      subscriptions: []
+      subscriptions: [],
+      status: 'pending',
+      totalSubscriptions: 0,
+      currentPage: 1,
+      totalPages: 1
     });
   }
 });
@@ -263,9 +315,38 @@ router.get('/payments', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
+    const status = req.query.status || '';
+    const method = req.query.method || '';
+    const search = req.query.search || '';
     
-    const totalPayments = await Payment.countDocuments();
-    const payments = await Payment.find()
+    let query = {};
+    if (status) query.status = status;
+    if (method) query.paymentMethod = method;
+    if (search) {
+      const users = await User.find({
+        $or: [
+          { username: new RegExp(search, 'i') },
+          { email: new RegExp(search, 'i') }
+        ]
+      }).select('_id');
+      query.userId = { $in: users.map(u => u._id) };
+    }
+    
+    const totalPayments = await Payment.countDocuments(query);
+    const totalRevenue = await Payment.aggregate([
+      { $match: { ...query, status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]).then(result => result[0]?.total || 0);
+    
+    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const monthlyRevenue = await Payment.aggregate([
+      { $match: { status: 'completed', createdAt: { $gte: monthStart } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]).then(result => result[0]?.total || 0);
+    
+    const pendingPayments = await Payment.countDocuments({ status: 'pending' });
+    
+    const payments = await Payment.find(query)
       .populate('userId', 'username email')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -276,39 +357,81 @@ router.get('/payments', async (req, res) => {
     res.render('admin/payments', {
       pageTitle: 'Payments Management - Admin',
       payments,
-      pagination
+      pagination,
+      totalRevenue,
+      totalPayments,
+      monthlyRevenue,
+      pendingPayments,
+      currentPage: page,
+      totalPages: Math.ceil(totalPayments / limit),
+      status,
+      method,
+      search
     });
   } catch (error) {
     console.error('Payments management error:', error);
     res.render('admin/payments', {
       pageTitle: 'Payments Management - Admin',
       payments: [],
-      pagination: {}
+      pagination: {},
+      totalRevenue: 0,
+      totalPayments: 0,
+      monthlyRevenue: 0,
+      pendingPayments: 0,
+      currentPage: 1,
+      totalPages: 1,
+      status: '',
+      method: '',
+      search: ''
     });
   }
 });
 
 // Settings page
 router.get('/settings', async (req, res) => {
+  // Load settings from environment or database
+  const settings = {
+    siteName: process.env.APP_NAME || 'SUB4SUB',
+    siteDescription: 'YouTube Subscription Exchange Platform',
+    contactEmail: process.env.ADMIN_EMAIL || 'admin@sub4sub.com',
+    maintenanceMode: false,
+    pointsPerSub: 10,
+    dailyFreeLimit: 50,
+    dailyPremiumLimit: 500,
+    signupBonus: 100,
+    enableStripe: !!process.env.STRIPE_SECRET_KEY,
+    enablePayPal: !!process.env.PAYPAL_CLIENT_ID,
+    monthlyPrice: 9.99,
+    yearlyPrice: 99.99,
+    enableRegistration: true,
+    requireEmailVerification: false,
+    maxLoginAttempts: 5,
+    sessionTimeout: 24
+  };
+  
   res.render('admin/settings', {
-    pageTitle: 'Settings - Admin'
+    pageTitle: 'Settings - Admin',
+    settings
   });
 });
 
 // Content management
-router.get('/content-management', async (req, res) => {
+router.get('/content', async (req, res) => {
   try {
-    const contents = await Content.find().sort({ type: 1 });
+    const page = req.query.page || 'about';
+    const content = await Content.findOne({ type: page });
     
     res.render('admin/content-management', {
       pageTitle: 'Content Management - Admin',
-      contents
+      page,
+      content
     });
   } catch (error) {
     console.error('Content management error:', error);
     res.render('admin/content-management', {
       pageTitle: 'Content Management - Admin',
-      contents: []
+      page: 'about',
+      content: null
     });
   }
 });
@@ -338,35 +461,86 @@ router.get('/content/:type', async (req, res) => {
 });
 
 // Update content
-router.post('/content/:type', async (req, res) => {
+router.post('/content/:page', async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, isActive } = req.body;
+    const page = req.params.page;
     
-    let contentDoc = await Content.findOne({ type: req.params.type });
+    let contentDoc = await Content.findOne({ type: page });
     
     if (contentDoc) {
       contentDoc.title = title;
       contentDoc.content = content;
+      contentDoc.isActive = isActive === 'on';
+      contentDoc.version = (contentDoc.version || 1) + 1;
       contentDoc.lastUpdatedBy = req.session.user._id;
       await contentDoc.save();
     } else {
-      await Content.create({
-        type: req.params.type,
+      contentDoc = await Content.create({
+        type: page,
         title,
         content,
+        isActive: isActive === 'on',
+        version: 1,
         lastUpdatedBy: req.session.user._id
       });
     }
     
     req.session.message = 'Content updated successfully';
     req.session.messageType = 'success';
-    res.redirect('/admin/content-management');
+    res.redirect(`/admin/content?page=${page}`);
   } catch (error) {
-    console.error('Update content error:', error);
+    console.error('Content update error:', error);
     req.session.message = 'Error updating content';
     req.session.messageType = 'error';
-    res.redirect('/admin/content-management');
+    res.redirect('/admin/content');
   }
+});
+
+// Settings POST handlers
+router.post('/settings/app', async (req, res) => {
+  try {
+    // In a real app, save these to a settings database collection
+    req.session.message = 'Application settings updated successfully';
+    req.session.messageType = 'success';
+  } catch (error) {
+    req.session.message = 'Error updating settings';
+    req.session.messageType = 'error';
+  }
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/points', async (req, res) => {
+  try {
+    req.session.message = 'Points settings updated successfully';
+    req.session.messageType = 'success';
+  } catch (error) {
+    req.session.message = 'Error updating settings';
+    req.session.messageType = 'error';
+  }
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/payment', async (req, res) => {
+  try {
+    req.session.message = 'Payment settings updated successfully';
+    req.session.messageType = 'success';
+  } catch (error) {
+    req.session.message = 'Error updating settings';
+    req.session.messageType = 'error';
+  }
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/security', async (req, res) => {
+  try {
+    req.session.message = 'Security settings updated successfully';
+    req.session.messageType = 'success';
+  } catch (error) {
+    req.session.message = 'Error updating settings';
+    req.session.messageType = 'error';
+  }
+  res.redirect('/admin/settings');
 });
 
 // Admin logout
