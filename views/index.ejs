@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero-modern text-center py-5 bg-primary text-white">
+    <div class="container">
+        <h1 class="display-4 mb-4">
+            Accelerate Your YouTube Growth 🚀
+        </h1>
+        <p class="lead mb-4">
+            Join thousands of creators exchanging subscriptions and building their channels organically
+        </p>
+        <div class="mt-4">
+            <% if (!isLoggedIn) { %>
+                <a href="/auth/register" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-rocket"></i> Get Started Free
+                </a>
+                <a href="/about" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            <% } else { %>
+                <a href="/exchange" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-users"></i> Start Exchanging
+                </a>
+                <a href="/account" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-chart-line"></i> View Dashboard
+                </a>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="display-4 text-primary"><%= stats.totalUsers || 0 %></h2>
+                        <p class="text-muted">Active Users</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="display-4 text-success"><%= stats.totalSubscriptions || 0 %></h2>
+                        <p class="text-muted">Subscriptions Exchanged</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="display-4 text-warning">95%</h2>
+                        <p class="text-muted">Satisfaction Rate</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="display-4 text-info">24/7</h2>
+                        <p class="text-muted">Support Available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose SUB4SUB?</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt fa-4x text-primary mb-3"></i>
+                        <h4>100% Safe & Secure</h4>
+                        <p>Your account safety is our priority. We use industry-standard security measures.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-4x text-success mb-3"></i>
+                        <h4>Real Users Only</h4>
+                        <p>Connect with genuine YouTube creators. No bots, no fake accounts.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-bolt fa-4x text-warning mb-3"></i>
+                        <h4>Lightning Fast</h4>
+                        <p>See results immediately. Start exchanging and watch your channel grow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<% if (!isLoggedIn) { %>
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+        <h2 class="mb-4">Ready to Grow Your Channel?</h2>
+        <p class="lead mb-4">Join our community today and start exchanging subscriptions!</p>
+        <a href="/auth/register" class="btn btn-light btn-lg">
+            <i class="fas fa-user-plus"></i> Sign Up Now - It's Free!
+        </a>
+    </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>

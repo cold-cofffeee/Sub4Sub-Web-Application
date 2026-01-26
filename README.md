@@ -1,254 +1,491 @@
-# SUB4SUB v2.0 - Professional Production Setup Guide
+# SUB4SUB v2.0 - Node.js Edition
 
-## 🚀 Quick Start (5 Minutes)
+**YouTube Channel Growth Platform** - Fully rewritten in Node.js with MongoDB
 
-### 1. Database Setup
-```sql
-CREATE DATABASE sub4sub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-5.0+-green.svg)](https://www.mongodb.com/)
+[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
+
+---
+
+## 📖 Overview
+
+SUB4SUB is a platform that helps YouTube creators grow their channels by exchanging subscriptions with other creators. This is a **complete rewrite** from PHP/MySQL to **Node.js/MongoDB** with modern architecture and best practices.
+
+### What's New in v2.0?
+
+✅ **Complete Node.js Migration** - Modern JavaScript (ES6+)  
+✅ **MongoDB Database** - NoSQL flexibility and scalability  
+✅ **Express.js Framework** - Fast, minimalist web framework  
+✅ **EJS Templating** - Clean, organized views  
+✅ **Enhanced Security** - Helmet.js, rate limiting, CSRF protection  
+✅ **RESTful API** - JSON endpoints for future mobile apps  
+✅ **Session Management** - MongoDB-backed sessions  
+✅ **Email Service** - Nodemailer integration (optional)  
+✅ **Payment Ready** - Stripe/PayPal integration support  
+✅ **Modern UI** - Bootstrap 5 responsive design  
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
 ```
 
-Then run the migration:
+### 2. Set Up MongoDB
+
+Make sure MongoDB is installed and running:
+
 ```bash
-php install/migrate.php
+# Check MongoDB status
+mongosh --eval "db.version()"
+
+# If not running, start it:
+# Windows: net start MongoDB
+# Linux/Mac: sudo systemctl start mongod
 ```
 
-### 2. Environment Configuration
+**Don't have MongoDB?** Download [MongoDB Compass](https://www.mongodb.com/try/download/compass) (easiest option)
+
+### 3. Configure Environment
+
 ```bash
+# Copy example environment file
 cp .env.example .env
 ```
 
-Edit `.env` with your settings:
+Edit `.env` with your settings (minimal required):
 ```env
-# Required - Database
-DB_HOST=localhost
-DB_NAME=sub4sub
-DB_USER=root
-DB_PASS=your_password
-
-# Required - Admin Access
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=ChangeThisPassword123!
-
-# Optional - Email (Leave empty to disable)
-SMTP_HOST=smtp.gmail.com
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-
-# Optional - Payments (Leave empty for demo mode)
-STRIPE_SECRET_KEY=sk_live_your_stripe_key
-PAYPAL_CLIENT_ID=your_paypal_client_id
+MONGODB_URI=mongodb://localhost:27017/sub4sub
+SESSION_SECRET=your-random-secret-key-here
 ```
 
-### 3. Access Your Site
-- **Website**: http://yourdomain.com
-- **Admin Panel**: http://yourdomain.com/Admin/login.php
-- **Default Admin**: admin / admin123 (Change in .env!)
+### 4. Initialize Database
+
+```bash
+npm run migrate
+```
+
+This creates:
+- Admin user (admin@sub4sub.com / admin123)
+- Database collections
+- Default content pages
+
+### 5. Generate View Templates
+
+```bash
+node scripts/generate-views.js
+```
+
+### 6. Start the Server
+
+```bash
+# Development mode (auto-reload)
+npm run dev
+
+# OR Production mode
+npm start
+```
+
+Visit: **http://localhost:3000**
 
 ---
 
-## 📁 Professional File Structure
+## 📋 Full Documentation
+
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed installation and configuration
+- **[package.json](package.json)** - Dependencies and scripts
+
+---
+
+## 🎯 Features
+
+### For Users
+- ✅ Register and login securely
+- ✅ Browse YouTube channels to subscribe to
+- ✅ Verify subscriptions
+- ✅ Track subscription history
+- ✅ View analytics and statistics
+- ✅ Upgrade to premium accounts
+- ✅ Receive notifications
+
+### For Admins
+- ✅ Comprehensive dashboard
+- ✅ User management (ban/unban, premium toggle)
+- ✅ Subscription verification
+- ✅ Payment history
+- ✅ Content page management
+- ✅ System settings
+
+### Technical Features
+- ✅ RESTful API with rate limiting
+- ✅ MongoDB with Mongoose ODM
+- ✅ Session-based authentication
+- ✅ Password hashing with bcrypt
+- ✅ Email notifications (optional)
+- ✅ File upload support
+- ✅ Input validation
+- ✅ CSRF protection
+- ✅ Secure headers (Helmet.js)
+- ✅ Error handling
+- ✅ Logging
+
+---
+
+## 🛠 Tech Stack
+
+| Category | Technology |
+|----------|-----------|
+| **Runtime** | Node.js 16+ |
+| **Framework** | Express.js 4.x |
+| **Database** | MongoDB 5.0+ |
+| **ODM** | Mongoose 8.x |
+| **Templating** | EJS |
+| **Authentication** | bcryptjs, express-session |
+| **Email** | Nodemailer |
+| **Security** | Helmet.js, express-rate-limit |
+| **Validation** | express-validator |
+| **File Upload** | Multer |
+| **UI Framework** | Bootstrap 5 |
+| **Icons** | Font Awesome 6 |
+
+---
+
+## 📁 Project Structure
 
 ```
-Sub4Sub-Web-Application/
-├── Admin/                          # Admin Panel
-│   ├── login.php                   # Admin authentication
-│   ├── dashboard.php               # Statistics & overview
-│   ├── users.php                   # User management
-│   ├── payments.php                # Payment history
-│   ├── settings.php                # Global settings
-│   ├── content-management.php      # Content hub
-│   └── ...
-│
-├── api/                            # RESTful API
-├── assets/                         # CSS, JS, Images
-├── classes/                        # OOP Architecture
-│   ├── Database.php                # PDO singleton
-│   ├── User.php                    # User model
-│   ├── Security.php                # Security utilities
-│   ├── EmailService.php            # Email (optional)
-│   └── Logger.php                  # Logging system
-│
-├── config/                         # Configuration
-├── includes/                       # Header/Footer templates
-├── install/                        # Database migration
-│
-├── index.php                       # Landing page
-├── account.php                     # User dashboard
-├── exchange.php                    # Subscription exchange
-├── purchase.php                    # Premium checkout
-├── .env.example                    # Environment template
-└── README.md                       # This file
+Sub4Sub/
+├── assets/              # Static files (CSS, JS)
+├── config/              # Configuration
+│   └── config.js
+├── middleware/          # Express middleware
+│   ├── auth.js          # Authentication
+│   ├── errorHandler.js  # Error handling
+│   ├── upload.js        # File uploads
+│   └── validation.js    # Input validation
+├── models/              # Mongoose models
+│   ├── User.js
+│   ├── Subscription.js
+│   ├── Payment.js
+│   ├── Notification.js
+│   └── Content.js
+├── routes/              # Express routes
+│   ├── main.js          # Public pages
+│   ├── auth.js          # Authentication
+│   ├── admin.js         # Admin panel
+│   └── api.js           # REST API
+├── scripts/             # Utility scripts
+│   ├── migrate.js       # Database setup
+│   ├── generate-views.js
+│   └── cleanup-php-files.js
+├── utils/               # Helpers
+│   ├── emailService.js
+│   └── helpers.js
+├── views/               # EJS templates
+│   ├── partials/
+│   ├── auth/
+│   ├── admin/
+│   ├── errors/
+│   └── *.ejs
+├── uploads/             # User uploads
+├── .env                 # Environment variables
+├── .env.example         # Environment template
+├── .gitignore          # Git ignore rules
+├── package.json         # Dependencies
+├── server.js            # Entry point
+├── README.md            # This file
+└── SETUP_GUIDE.md       # Detailed setup
 ```
 
 ---
 
-## 💳 Payment Gateway Integration
+## 🌐 URLs
 
-### Demo Mode (Default - No Configuration Needed)
-- Works immediately without any setup
-- Creates test transactions
-- Perfect for development
+### Public Pages
+- **Home**: `/`
+- **Login**: `/auth/login`
+- **Register**: `/auth/register`
+- **About**: `/about`
+- **FAQ**: `/faq`
+- **Contact**: `/contact`
+- **Privacy**: `/privacy`
+- **Terms**: `/tos`
 
-### Stripe Integration
-1. Get API keys from https://dashboard.stripe.com/apikeys
-2. Add to `.env`: `STRIPE_SECRET_KEY=sk_live_xxxxx`
-3. Users can pay with credit cards
+### User Pages (Requires Login)
+- **Dashboard**: `/account`
+- **Exchange**: `/exchange`
+- **Analytics**: `/analytics`
+- **Notifications**: `/notification`
+- **Purchase Premium**: `/purchase`
 
-### PayPal Integration
-1. Create app at https://developer.paypal.com
-2. Add to `.env`: `PAYPAL_CLIENT_ID=xxxxx`
-3. PayPal checkout enabled
+### Admin Panel (Requires Admin)
+- **Dashboard**: `/admin/dashboard`
+- **Users**: `/admin/users`
+- **Verify Subscriptions**: `/admin/verify-users`
+- **Payments**: `/admin/payments`
+- **Content Management**: `/admin/content-management`
+- **Settings**: `/admin/settings`
+
+### API Endpoints
+- **API Info**: `/api/`
+- **User Data**: `/api/user`
+- **Users List**: `/api/users`
+- **Subscriptions**: `/api/subscriptions`
+- **Notifications**: `/api/notifications`
+- **Statistics**: `/api/stats`
 
 ---
 
-## 📧 Email Configuration (100% Optional)
+## 📦 NPM Scripts
 
-**The app works perfectly without email configuration.**
+```bash
+# Install dependencies
+npm install
 
-Leave SMTP settings empty in `.env` to disable:
+# Run database migration
+npm run migrate
+
+# Start production server
+npm start
+
+# Start development server (auto-reload)
+npm run dev
+
+# Generate view templates
+node scripts/generate-views.js
+
+# Clean up old PHP files (already done)
+node scripts/cleanup-php-files.js
+```
+
+---
+
+## 🔐 Default Credentials
+
+**Admin Account:**
+- Email: `admin@sub4sub.com`
+- Password: `admin123`
+
+⚠️ **IMPORTANT**: Change the admin password immediately after first login!
+
+---
+
+## 🐛 Troubleshooting
+
+### MongoDB Connection Error
+
+```
+✗ MongoDB connection error: connect ECONNREFUSED
+```
+
+**Solution:**
+1. Make sure MongoDB is installed
+2. Start MongoDB service:
+   - Windows: `net start MongoDB` (as Administrator)
+   - Linux/Mac: `sudo systemctl start mongod`
+3. Verify: `mongosh --eval "db.version()"`
+
+### Port Already in Use
+
+```
+Error: listen EADDRINUSE: address already in use :::3000
+```
+
+**Solution:**
+1. Change port in `.env`: `PORT=3001`
+2. Or kill process on port 3000
+
+### Views Not Found
+
+```
+Error: Failed to lookup view
+```
+
+**Solution:**
+```bash
+node scripts/generate-views.js
+```
+
+### Admin Can't Login
+
+**Solution:**
+```bash
+npm run migrate
+```
+
+This recreates the admin user.
+
+---
+
+## 🚀 Deployment
+
+### Option 1: Railway.app (Recommended)
+
+1. Sign up at [Railway.app](https://railway.app/)
+2. Connect your GitHub repository
+3. Add MongoDB plugin
+4. Set environment variables
+5. Deploy automatically!
+
+### Option 2: Heroku
+
+```bash
+heroku create your-app-name
+heroku addons:create mongolab:sandbox
+heroku config:set NODE_ENV=production
+git push heroku main
+```
+
+### Option 3: VPS (DigitalOcean, Linode, etc.)
+
+```bash
+# Install Node.js and MongoDB
+# Clone repository
+git clone your-repo-url
+cd Sub4Sub
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+nano .env
+
+# Run migration
+npm run migrate
+
+# Use PM2 for process management
+npm install -g pm2
+pm2 start server.js --name sub4sub
+pm2 startup
+pm2 save
+```
+
+---
+
+## 📧 Email Configuration (Optional)
+
+Email functionality is **optional**. The app works fine without it!
+
+To enable emails (e.g., welcome emails, password resets):
+
+1. For Gmail, create an [App Password](https://myaccount.google.com/apppasswords)
+2. Add to `.env`:
+   ```env
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-16-char-app-password
+   ```
+
+---
+
+## 💳 Payment Configuration (Optional)
+
+Payment gateways are **optional**. The app includes a demo mode for testing!
+
+### Stripe
 ```env
-SMTP_HOST=
-SMTP_USER=
-SMTP_PASS=
+STRIPE_SECRET_KEY=sk_test_your_key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_key
 ```
 
-To enable Gmail:
+### PayPal
 ```env
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
+PAYPAL_CLIENT_ID=your_client_id
+PAYPAL_CLIENT_SECRET=your_secret
+PAYPAL_MODE=sandbox
 ```
 
 ---
 
-## 🔒 Security Features
+## 🔒 Security Best Practices
 
-✅ CSRF Protection  
-✅ Password Hashing (bcrypt)  
-✅ SQL Injection Prevention  
-✅ XSS Protection  
-✅ Rate Limiting  
-✅ Session Security  
-✅ API Authentication  
-✅ Activity Logging  
-✅ AES-256 Encryption
-
----
-
-## 🎨 Modern Features
-
-### User Features
-- Responsive Design
-- Real-time Statistics
-- AJAX Operations
-- Premium Subscriptions
-- Analytics Dashboard
-- Notification System
-
-### Admin Features
-- Modern Dashboard
-- User Management
-- Payment Tracking
-- Content Management
-- Activity Logs
-- Settings Panel
+1. ✅ Change `SESSION_SECRET` to a long random string
+2. ✅ Change admin password after first login
+3. ✅ Set `NODE_ENV=production` in production
+4. ✅ Use HTTPS in production
+5. ✅ Keep dependencies updated
+6. ✅ Use strong passwords
+7. ✅ Enable MongoDB authentication
+8. ✅ Set up firewall rules
 
 ---
 
-## 🎯 Pricing Plans
+## 🆚 PHP vs Node.js Comparison
 
-- **Free**: 10 subscriptions/day, basic features
-- **Monthly ($9.99)**: Unlimited subscriptions, advanced analytics
-- **Quarterly ($24.99)**: Save 17%, extended features
-- **Yearly ($99.99)**: Save 17%, all features
-
----
-
-## 🌐 Production Deployment
-
-### Security Checklist
-- [ ] Change `ADMIN_PASSWORD` in `.env`
-- [ ] Set `APP_ENV=production`
-- [ ] Set `APP_DEBUG=false`
-- [ ] Configure payment gateways
-- [ ] Set up HTTPS/SSL
-- [ ] Configure backups
-
-### Performance
-```php
-// Enable OPcache in php.ini
-opcache.enable=1
-opcache.memory_consumption=128
-```
+| Aspect | Old (PHP) | New (Node.js) |
+|--------|-----------|---------------|
+| **Language** | PHP 7+ | JavaScript (ES6+) |
+| **Framework** | Plain PHP | Express.js |
+| **Database** | MySQL | MongoDB |
+| **ORM** | PDO | Mongoose |
+| **Templating** | PHP includes | EJS |
+| **Sessions** | File-based | MongoDB-backed |
+| **Performance** | Good | Excellent |
+| **Scalability** | Limited | High |
+| **Real-time** | No | Ready for Socket.io |
+| **API** | Basic | RESTful + Rate limiting |
+| **Modern Features** | No | Yes |
 
 ---
 
-## 🆘 Troubleshooting
+## 📞 Support
 
-**Database Error**: Check `.env` DB credentials  
-**Admin Can't Login**: Default is admin/admin123  
-**Email Not Sending**: This is normal - email is optional  
-**Payment Not Working**: Demo mode is automatic  
-**Styling Broken**: Clear browser cache
+For issues or questions:
 
----
-
-## 🔌 API Endpoints
-
-```
-POST /api/auth/login
-POST /api/auth/register
-GET  /api/users/me
-GET  /api/subscriptions
-POST /api/subscriptions
-GET  /api/notifications
-```
-
-Authentication: Bearer token in `Authorization` header
+1. Check [SETUP_GUIDE.md](SETUP_GUIDE.md)
+2. Review error messages in console
+3. Verify MongoDB is running
+4. Check `.env` configuration
+5. Ensure all dependencies are installed
 
 ---
 
-## 📊 Database Schema
+## 📄 License
 
-**8 Tables**:
-- users
-- subscriptions
-- payments
-- notifications
-- activity_logs
-- settings
-- points
-- api_tokens
+This project is proprietary and private.
 
 ---
 
-## 📝 Version 2.0.0 Features
+## 🎉 What's Been Migrated
 
-✅ Complete codebase overhaul  
-✅ Modern OOP architecture  
-✅ Professional file naming  
-✅ Working payment gateways  
-✅ Optional email system  
-✅ Modern admin panel  
-✅ Responsive design  
-✅ Comprehensive security  
-✅ RESTful API  
-✅ Production-ready
-
----
-
-## ⭐ Pro Tips
-
-1. Always backup before updates
-2. Use strong passwords in production
-3. Enable HTTPS for payments
-4. Monitor logs regularly
-5. Test payments in sandbox mode first
-6. Keep PHP and MySQL updated
+✅ **All Features** from PHP version  
+✅ **User Authentication** (Login/Register)  
+✅ **Subscription Exchange System**  
+✅ **Admin Panel** (Complete)  
+✅ **Payment Integration** (Stripe/PayPal ready)  
+✅ **Email Service** (Optional)  
+✅ **Content Pages** (About, FAQ, Privacy, TOS, Contact)  
+✅ **Analytics & Statistics**  
+✅ **Notifications System**  
+✅ **RESTful API** (New!)  
+✅ **Modern Security** (Improved!)  
+✅ **Responsive Design** (Enhanced!)  
 
 ---
 
-**Built with PHP 8.0+, MySQL 5.7+, Bootstrap 5**
+## 🚀 Next Steps
 
-**Ready to launch! 🚀**
+After installation:
+
+1. ✅ Install dependencies: `npm install`
+2. ✅ Configure `.env` file
+3. ✅ Start MongoDB
+4. ✅ Run migration: `npm run migrate`
+5. ✅ Generate views: `node scripts/generate-views.js`
+6. ✅ Start server: `npm run dev`
+7. 🔄 Visit http://localhost:3000
+8. 🔄 Login as admin
+9. 🔄 Change admin password
+10. 🔄 Customize content pages
+11. 🔄 Test all features
+12. 🔄 Deploy to production
+
+---
+
+**Built with ❤️ using Node.js, Express.js, MongoDB, and modern web technologies**
+
+*Successfully migrated from PHP/MySQL to Node.js/MongoDB - January 2026*
