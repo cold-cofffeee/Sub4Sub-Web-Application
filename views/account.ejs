@@ -1,0 +1,100 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="fas fa-user me-2"></i>My Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-circle"></i> Profile Information
+                </div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> <%= userProfile.username %></p>
+                    <p><strong>Email:</strong> <%= userProfile.email %></p>
+                    <p><strong>Status:</strong> 
+                        <% if (userProfile.isPremium) { %>
+                            <span class="badge bg-warning text-dark">Premium</span>
+                        <% } else { %>
+                            <span class="badge bg-secondary">Free</span>
+                        <% } %>
+                    </p>
+                    <p><strong>Member since:</strong> <%= new Date(userProfile.createdAt).toLocaleDateString() %></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-edit"></i> Update Profile
+                </div>
+                <div class="card-body">
+                    <form action="/auth/update-profile" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="fullName" class="form-control" value="<%= userProfile.fullName || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">YouTube Channel Name</label>
+                            <input type="text" name="youtubeChannelName" class="form-control" value="<%= userProfile.youtubeChannelName || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">YouTube Channel URL</label>
+                            <input type="url" name="youtubeChannel" class="form-control" value="<%= userProfile.youtubeChannel || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="locationAddress" class="form-control" value="<%= userProfile.locationAddress || '' %>">
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-history"></i> Recent Activity
+        </div>
+        <div class="card-body">
+            <% if (subscriptions && subscriptions.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Channel</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% subscriptions.forEach(sub => { %>
+                                <tr>
+                                    <td><%= sub.targetChannelName %></td>
+                                    <td>
+                                        <% if (sub.status === 'verified') { %>
+                                            <span class="badge bg-success">Verified</span>
+                                        <% } else if (sub.status === 'pending') { %>
+                                            <span class="badge bg-warning">Pending</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Rejected</span>
+                                        <% } %>
+                                    </td>
+                                    <td><%= new Date(sub.createdAt).toLocaleDateString() %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p class="text-muted text-center">No activity yet</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

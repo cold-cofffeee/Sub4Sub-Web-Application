@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Create Your Account</h2>
+                    <form action="/auth/register" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username *</label>
+                                <input type="text" name="username" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password *</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password *</label>
+                                <input type="password" name="confirmPassword" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">YouTube Channel Name</label>
+                            <input type="text" name="youtubeChannelName" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">YouTube Channel URL</label>
+                            <input type="url" name="youtubeChannelUrl" class="form-control" placeholder="https://youtube.com/@yourchannel">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="locationAddress" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="/auth/login">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
