@@ -121,6 +121,7 @@ router.get('/analytics', isAuthenticated, async (req, res) => {
     
     res.render('analytics', {
       pageTitle: 'Analytics - SUB4SUB',
+      user,
       stats: {
         total: subscriptionsCount,
         verified: verifiedCount,
@@ -132,6 +133,7 @@ router.get('/analytics', isAuthenticated, async (req, res) => {
     console.error('Analytics page error:', error);
     res.render('analytics', {
       pageTitle: 'Analytics - SUB4SUB',
+      user: req.session.user,
       stats: { total: 0, verified: 0, pending: 0 },
       recentActivity: []
     });
