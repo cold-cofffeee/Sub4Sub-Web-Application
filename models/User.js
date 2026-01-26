@@ -260,60 +260,127 @@ userSchema.virtual('id').get(function() {
 // ===== CREDIT MANAGEMENT METHODS =====
 
 // Add credits (with daily limit check for earning)
+// Uses atomic operations to prevent race conditions
 userSchema.methods.addCredits = async function(amount, reason = 'earned', checkDaily = true) {
   const config = require('../config/config');
   
+  // Validate amount is positive
+  if (amount <= 0) {
+    return { success: false, message: 'Invalid credit amount' };
+  }
+  
+  amount = Math.floor(amount); // Ensure integer
+  
+  let updateFields = {
+    $inc: { credits: amount }
+  };
+  let filter = { _id: this._id };
+  
   if (checkDaily && reason === 'earned') {
-    // Reset daily counter if new day
+    // Check if daily reset needed
     const today = new Date().setHours(0, 0, 0, 0);
     const resetDay = new Date(this.dailyCreditsReset).setHours(0, 0, 0, 0);
     
-    if (today > resetDay) {
-      this.dailyCreditsEarned = 0;
-      this.dailyCreditsReset = new Date();
-    }
-    
-    // Check daily limit based on premium status
+    // Determine daily limit
     const dailyLimit = this.isPremium || this.premiumTier !== 'free' 
       ? config.credits.dailyLimitPremium 
       : config.credits.dailyLimitFree;
     
-    if (this.dailyCreditsEarned >= dailyLimit) {
-      return { success: false, message: 'Daily credit limit reached' };
+    if (today > resetDay) {
+      // Reset counter atomically
+      updateFields.$set = { 
+        dailyCreditsEarned: amount,
+        dailyCreditsReset: new Date()
+      };
+      updateFields.$inc.lifetimeCreditsEarned = amount;
+    } else {
+      // Check daily limit hasn't been reached
+      filter.dailyCreditsEarned = { $lt: dailyLimit };
+      
+      // Cap amount to not exceed limit
+      const availableToday = dailyLimit - this.dailyCreditsEarned;
+      if (amount > availableToday) {
+        amount = availableToday;
+      }
+      
+      if (amount <= 0) {
+        return { success: false, message: 'Daily credit limit reached' };
+      }
+      
+      updateFields.$inc = {
+        credits: amount,
+        dailyCreditsEarned: amount,
+        lifetimeCreditsEarned: amount
+      };
     }
-    
-    // Cap the amount to not exceed daily limit
-    const availableToday = dailyLimit - this.dailyCreditsEarned;
-    amount = Math.min(amount, availableToday);
+  } else {
+    // Non-earned credits (referral, purchase, bonus)
+    if (reason === 'referral') {
+      updateFields.$inc.referralCreditsEarned = amount;
+      updateFields.$inc.lifetimeCreditsEarned = amount;
+    } else if (reason === 'purchase' || reason === 'bonus') {
+      updateFields.$inc.lifetimeCreditsEarned = amount;
+    }
   }
   
-  this.credits += amount;
+  // Atomic update with condition
+  const User = mongoose.model('User');
+  const result = await User.findOneAndUpdate(
+    filter,
+    updateFields,
+    { new: true }
+  );
   
-  if (reason === 'earned') {
-    this.dailyCreditsEarned += amount;
-    this.lifetimeCreditsEarned += amount;
-  } else if (reason === 'referral') {
-    this.referralCreditsEarned += amount;
-    this.lifetimeCreditsEarned += amount;
-  } else if (reason === 'purchase' || reason === 'bonus') {
-    this.lifetimeCreditsEarned += amount;
+  if (!result) {
+    return { success: false, message: 'Daily credit limit reached or user not found' };
   }
   
-  await this.save();
-  return { success: true, amount, newBalance: this.credits };
+  // Update this instance's fields
+  this.credits = result.credits;
+  this.dailyCreditsEarned = result.dailyCreditsEarned;
+  this.lifetimeCreditsEarned = result.lifetimeCreditsEarned;
+  if (result.referralCreditsEarned !== undefined) {
+    this.referralCreditsEarned = result.referralCreditsEarned;
+  }
+  
+  return { success: true, amount, newBalance: result.credits };
 };
 
 // Spend credits
+// Uses atomic operations to prevent race conditions and negative balances
 userSchema.methods.spendCredits = async function(amount) {
-  if (this.credits < amount) {
+  // Validate amount is positive
+  if (amount <= 0) {
+    return { success: false, message: 'Invalid credit amount' };
+  }
+  
+  amount = Math.floor(amount); // Ensure integer
+  
+  // Atomic update with balance condition
+  const User = mongoose.model('User');
+  const result = await User.findOneAndUpdate(
+    {
+      _id: this._id,
+      credits: { $gte: amount } // Only update if sufficient credits
+    },
+    {
+      $inc: {
+        credits: -amount,
+        lifetimeCreditsSpent: amount
+      }
+    },
+    { new: true }
+  );
+  
+  if (!result) {
     return { success: false, message: 'Insufficient credits' };
   }
   
-  this.credits -= amount;
-  this.lifetimeCreditsSpent += amount;
-  await this.save();
+  // Update this instance's fields
+  this.credits = result.credits;
+  this.lifetimeCreditsSpent = result.lifetimeCreditsSpent;
   
-  return { success: true, newBalance: this.credits };
+  return { success: true, newBalance: result.credits };
 };
 
 // ===== QUALITY SCORE METHODS =====
