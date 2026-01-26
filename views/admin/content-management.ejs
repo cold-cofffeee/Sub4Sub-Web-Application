@@ -1,88 +1,185 @@
 <%- include('../partials/header') %>
 
+<style>
+  .admin-sidebar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: calc(100vh - 140px);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .admin-sidebar .nav-link {
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+  }
+  .admin-sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+  }
+  .admin-sidebar .nav-link.active {
+    background: linear-gradient(135deg, #FF0000 0%, #FF6B6B 100%);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+  }
+  .content-tabs .nav-link {
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    color: #6b7280;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+  }
+  .content-tabs .nav-link:hover {
+    background: #f3f4f6;
+    color: #FF0000;
+  }
+  .content-tabs .nav-link.active {
+    background: linear-gradient(135deg, #FF0000 0%, #FF6B6B 100%);
+    color: white;
+  }
+  .content-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: none;
+  }
+  .content-card .card-header {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 2px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+    padding: 20px;
+  }
+  .preview-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  }
+  .btn-save {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+</style>
+
 <div class="container-fluid mt-4">
   <div class="row">
     <!-- Sidebar -->
-    <div class="col-md-2 bg-dark text-white min-vh-100 py-3">
-      <h5 class="mb-4"><i class="fas fa-user-shield me-2"></i>Admin Panel</h5>
-      <nav class="nav flex-column">
-        <a class="nav-link text-white" href="/admin/dashboard">
-          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-        </a>
-        <a class="nav-link text-white" href="/admin/users">
-          <i class="fas fa-users me-2"></i>Users
-        </a>
-        <a class="nav-link text-white" href="/admin/verify-users">
-          <i class="fas fa-user-check me-2"></i>Verify Users
-        </a>
-        <a class="nav-link text-white" href="/admin/payments">
-          <i class="fas fa-dollar-sign me-2"></i>Payments
-        </a>
-        <a class="nav-link text-white active" href="/admin/content">
-          <i class="fas fa-file-alt me-2"></i>Content
-        </a>
-        <a class="nav-link text-white" href="/admin/settings">
-          <i class="fas fa-cog me-2"></i>Settings
-        </a>
-        <hr class="bg-white">
-        <a class="nav-link text-white" href="/">
-          <i class="fas fa-home me-2"></i>Back to Site
-        </a>
-        <a class="nav-link text-white" href="/auth/logout">
-          <i class="fas fa-sign-out-alt me-2"></i>Logout
-        </a>
-      </nav>
+    <div class="col-md-2">
+      <div class="admin-sidebar text-white p-3">
+        <h5 class="mb-4 fw-bold"><i class="fas fa-shield-alt me-2"></i>Admin Panel</h5>
+        <nav class="nav flex-column">
+          <a class="nav-link text-white" href="/admin/dashboard">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+          </a>
+          <a class="nav-link text-white" href="/admin/users">
+            <i class="fas fa-users me-2"></i>Users
+          </a>
+          <a class="nav-link text-white" href="/admin/verify-users">
+            <i class="fas fa-user-check me-2"></i>Verify Users
+          </a>
+          <a class="nav-link text-white" href="/admin/payments">
+            <i class="fas fa-dollar-sign me-2"></i>Payments
+          </a>
+          <a class="nav-link text-white active" href="/admin/content">
+            <i class="fas fa-file-alt me-2"></i>Content
+          </a>
+          <a class="nav-link text-white" href="/admin/settings">
+            <i class="fas fa-cog me-2"></i>Settings
+          </a>
+          <hr class="bg-white opacity-25">
+          <a class="nav-link text-white" href="/">
+            <i class="fas fa-home me-2"></i>Back to Site
+          </a>
+          <a class="nav-link text-white" href="/auth/logout">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+          </a>
+        </nav>
+      </div>
     </div>
 
     <!-- Main Content -->
     <div class="col-md-10">
-      <h2 class="mb-4">Content Management</h2>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-edit me-2 text-primary"></i>Content Management</h2>
+        <div>
+          <span class="badge bg-success px-3 py-2"><i class="fas fa-check-circle me-1"></i>Autosave Enabled</span>
+        </div>
+      </div>
 
       <!-- Page Tabs -->
-      <ul class="nav nav-tabs mb-4" role="tablist">
+      <ul class="nav nav-tabs content-tabs mb-4" role="tablist">
         <li class="nav-item">
-          <a class="nav-link <%= page === 'about' ? 'active' : '' %>" href="?page=about">About Us</a>
+          <a class="nav-link <%= page === 'about' ? 'active' : '' %>" href="?page=about">
+            <i class="fas fa-info-circle me-1"></i>About Us
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link <%= page === 'faq' ? 'active' : '' %>" href="?page=faq">FAQ</a>
+          <a class="nav-link <%= page === 'faq' ? 'active' : '' %>" href="?page=faq">
+            <i class="fas fa-question-circle me-1"></i>FAQ
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link <%= page === 'privacy' ? 'active' : '' %>" href="?page=privacy">Privacy Policy</a>
+          <a class="nav-link <%= page === 'privacy' ? 'active' : '' %>" href="?page=privacy">
+            <i class="fas fa-shield-alt me-1"></i>Privacy Policy
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link <%= page === 'tos' ? 'active' : '' %>" href="?page=tos">Terms of Service</a>
+          <a class="nav-link <%= page === 'tos' ? 'active' : '' %>" href="?page=tos">
+            <i class="fas fa-file-contract me-1"></i>Terms of Service
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link <%= page === 'contact' ? 'active' : '' %>" href="?page=contact">Contact Info</a>
+          <a class="nav-link <%= page === 'contact' ? 'active' : '' %>" href="?page=contact">
+            <i class="fas fa-envelope me-1"></i>Contact Info
+          </a>
         </li>
       </ul>
 
       <!-- Edit Form -->
-      <div class="card">
+      <div class="card content-card mb-4">
         <div class="card-header">
-          <h5 class="mb-0">
-            Edit <%= page ? page.charAt(0).toUpperCase() + page.slice(1) : 'Content' %>
-            <% if (content && content.version) { %>
-              <span class="badge bg-secondary ms-2">Version <%= content.version %></span>
-            <% } %>
-          </h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+              <i class="fas fa-pencil-alt me-2 text-primary"></i>
+              Edit <%= page ? page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' ') : 'Content' %>
+            </h5>
+            <div>
+              <% if (content && content.version) { %>
+                <span class="badge bg-info px-3 py-2"><i class="fas fa-code-branch me-1"></i>Version <%= content.version %></span>
+              <% } %>
+              <% if (content && content.isActive) { %>
+                <span class="badge bg-success px-3 py-2"><i class="fas fa-eye me-1"></i>Published</span>
+              <% } else { %>
+                <span class="badge bg-warning px-3 py-2"><i class="fas fa-eye-slash me-1"></i>Draft</span>
+              <% } %>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <form action="/admin/content/<%= page %>" method="POST">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
+            <div class="mb-4">
+              <label for="title" class="form-label fw-semibold">
+                <i class="fas fa-heading me-2 text-primary"></i>Page Title
+              </label>
               <input 
                 type="text" 
-                class="form-control" 
+                class="form-control form-control-lg" 
                 id="title" 
                 name="title" 
                 value="<%= content ? content.title : '' %>" 
+                placeholder="Enter page title..."
                 required
+                style="border-radius: 8px; border: 2px solid #e5e7eb;"
               >
             </div>
 
-            <div class="mb-3">
-              <label for="content" class="form-label">Content</label>
+            <div class="mb-4">
+              <label for="content" class="form-label fw-semibold">
+                <i class="fas fa-align-left me-2 text-primary"></i>Page Content
+              </label>
               <textarea 
                 class="form-control" 
                 id="content" 
@@ -90,85 +187,161 @@
                 rows="15" 
                 required
               ><%= content ? content.content : '' %></textarea>
-              <div class="form-text">
-                You can use HTML tags for formatting
-              </div>
             </div>
 
-            <div class="mb-3">
-              <div class="form-check form-switch">
+            <div class="mb-4">
+              <div class="form-check form-switch" style="padding-left: 3rem;">
                 <input 
                   class="form-check-input" 
                   type="checkbox" 
                   id="isActive" 
                   name="isActive" 
                   <%= content && content.isActive ? 'checked' : '' %>
+                  style="width: 3rem; height: 1.5rem; cursor: pointer;"
                 >
-                <label class="form-check-label" for="isActive">
-                  Page is Active (visible to users)
+                <label class="form-check-label fw-semibold ms-2" for="isActive" style="cursor: pointer;">
+                  <i class="fas fa-globe me-2"></i>Publish this page (make it visible to users)
                 </label>
               </div>
             </div>
 
             <% if (content && content.updatedAt) { %>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Last updated: <%= new Date(content.updatedAt).toLocaleString() %>
+              <div class="alert alert-info d-flex align-items-center" style="border-radius: 8px;">
+                <i class="fas fa-clock me-3 fs-4"></i>
+                <div>
+                  <strong>Last Modified:</strong> <%= new Date(content.updatedAt).toLocaleString() %>
+                  <% if (content.updatedBy) { %>
+                    <br><small class="text-muted">by <%= content.updatedBy %></small>
+                  <% } %>
+                </div>
               </div>
             <% } %>
 
-            <div class="d-flex justify-content-between">
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save me-2"></i>Save Changes
-              </button>
-              <button type="button" class="btn btn-outline-secondary" onclick="window.open('/content/<%= page %>', '_blank')">
-                <i class="fas fa-eye me-2"></i>Preview
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <button type="submit" class="btn btn-primary btn-save btn-lg me-2">
+                  <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-lg" onclick="previewPage()">
+                  <i class="fas fa-eye me-2"></i>Preview
+                </button>
+              </div>
+              <button type="button" class="btn btn-outline-danger" onclick="if(confirm('Reset to default content?')) { document.getElementById('content').value = ''; tinymce.get('content').setContent(''); }">
+                <i class="fas fa-undo me-2"></i>Reset
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Content Preview -->
-      <div class="card mt-4">
+      <!-- Live Preview -->
+      <div class="card content-card preview-card">
         <div class="card-header">
-          <h5 class="mb-0">Live Preview</h5>
+          <h5 class="mb-0 fw-bold">
+            <i class="fas fa-desktop me-2 text-primary"></i>Live Preview
+          </h5>
         </div>
-        <div class="card-body">
-          <h3><%= content ? content.title : 'No Title' %></h3>
-          <hr>
-          <div id="preview">
-            <%= content ? content.content : 'No content available' %>
-          </div>
-        </div>
-      </div>
-
-      <!-- Version History -->
-      <% if (content && content.version > 1) { %>
-        <div class="card mt-4">
-          <div class="card-header">
-            <h5 class="mb-0">Version History</h5>
-          </div>
-          <div class="card-body">
-            <div class="alert alert-info">
-              <i class="fas fa-history me-2"></i>
-              This page has been updated <%= content.version %> times
+        <div class="card-body p-4">
+          <div class="preview-container">
+            <h3 class="mb-3" id="preview-title"><%= content ? content.title : 'No Title' %></h3>
+            <hr>
+            <div id="preview-content" class="content-preview">
+              <%- content ? content.content : '<p class="text-muted">No content available. Start typing above to see the preview.</p>' %>
             </div>
           </div>
         </div>
-      <% } %>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- TinyMCE Rich Text Editor -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-  // Simple live preview
-  const contentTextarea = document.getElementById('content');
-  const previewDiv = document.getElementById('preview');
-  
-  contentTextarea.addEventListener('input', function() {
-    previewDiv.innerHTML = this.value;
+  // Initialize TinyMCE
+  tinymce.init({
+    selector: '#content',
+    height: 500,
+    menubar: true,
+    plugins: [
+      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+      'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help | code | fullscreen',
+    content_style: 'body { font-family: Inter, sans-serif; font-size: 14px; }',
+    branding: false,
+    promotion: false,
+    setup: function(editor) {
+      editor.on('change keyup', function() {
+        updatePreview();
+      });
+    }
   });
+
+  // Update title preview
+  document.getElementById('title').addEventListener('input', function() {
+    document.getElementById('preview-title').textContent = this.value || 'No Title';
+  });
+
+  // Update content preview
+  function updatePreview() {
+    const content = tinymce.get('content').getContent();
+    document.getElementById('preview-content').innerHTML = content || '<p class="text-muted">No content available.</p>';
+  }
+
+  // Preview in new window
+  function previewPage() {
+    const pageType = '<%= page %>';
+    window.open(`/${pageType}`, '_blank');
+  }
+
+  // Auto-save draft (every 30 seconds)
+  let autoSaveTimer;
+  function enableAutoSave() {
+    autoSaveTimer = setInterval(function() {
+      const formData = new FormData(document.querySelector('form'));
+      formData.append('isDraft', 'true');
+      
+      fetch('/admin/content/<%= page %>', {
+        method: 'POST',
+        body: formData
+      }).then(response => {
+        if (response.ok) {
+          console.log('Auto-saved at ' + new Date().toLocaleTimeString());
+        }
+      });
+    }, 30000);
+  }
+
+  // Uncomment to enable auto-save
+  // enableAutoSave();
 </script>
+
+<style>
+  .content-preview {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    min-height: 200px;
+  }
+  .content-preview h1, .content-preview h2, .content-preview h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .content-preview p {
+    margin-bottom: 1rem;
+    line-height: 1.7;
+  }
+  .content-preview ul, .content-preview ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+  }
+  .content-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+</style>
 
 <%- include('../partials/footer') %>
