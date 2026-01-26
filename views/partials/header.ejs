@@ -99,6 +99,7 @@
                     <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a></li>
                     <% if (isLoggedIn) { %>
                     <li class="nav-item"><a class="nav-link" href="/exchange"><i class="fas fa-exchange-alt me-1"></i>Exchange</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/watch-rooms"><i class="fas fa-play-circle me-1"></i>Watch Rooms</a></li>
                     <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line me-1"></i>Analytics</a></li>
                     <% } %>
                     <li class="nav-item"><a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i>About</a></li>
@@ -115,6 +116,7 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/account"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
                             <li><a class="dropdown-item" href="/notification"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                            <li><a class="dropdown-item" href="/referrals"><i class="fas fa-users-cog me-2"></i>Referrals</a></li>
                             <% if (!user.isPremium) { %>
                             <li><a class="dropdown-item" href="/purchase"><i class="fas fa-crown me-2"></i>Go Premium</a></li>
                             <% } %>

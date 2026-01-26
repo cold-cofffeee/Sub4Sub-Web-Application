@@ -65,5 +65,70 @@ module.exports = {
   
   api: {
     rateLimit: parseInt(process.env.API_RATE_LIMIT) || 100
+  },
+  
+  // ===== ENGAGEMENT CREDITS SYSTEM =====
+  credits: {
+    // Starting credits for new users
+    signupBonus: parseInt(process.env.SIGNUP_BONUS_CREDITS) || 100,
+    
+    // Daily earning limits
+    dailyLimitFree: parseInt(process.env.DAILY_LIMIT_FREE) || 50,
+    dailyLimitPremium: parseInt(process.env.DAILY_LIMIT_PREMIUM) || 500,
+    
+    // Credit costs for actions
+    costs: {
+      subscription: parseInt(process.env.COST_SUBSCRIPTION) || 10,
+      like: parseInt(process.env.COST_LIKE) || 2,
+      comment: parseInt(process.env.COST_COMMENT) || 5,
+      watchMinute: parseInt(process.env.COST_WATCH_MINUTE) || 1,
+      shortView: parseInt(process.env.COST_SHORT_VIEW) || 3
+    },
+    
+    // Credit earnings for providing actions
+    earnings: {
+      subscription: parseInt(process.env.EARN_SUBSCRIPTION) || 10,
+      like: parseInt(process.env.EARN_LIKE) || 2,
+      comment: parseInt(process.env.EARN_COMMENT) || 5,
+      watchMinute: parseInt(process.env.EARN_WATCH_MINUTE) || 1,
+      shortView: parseInt(process.env.EARN_SHORT_VIEW) || 3
+    },
+    
+    // Premium multipliers
+    premiumMultipliers: {
+      basic: parseFloat(process.env.PREMIUM_MULT_BASIC) || 1.5,
+      pro: parseFloat(process.env.PREMIUM_MULT_PRO) || 2.0,
+      elite: parseFloat(process.env.PREMIUM_MULT_ELITE) || 3.0
+    },
+    
+    // Referral rewards
+    referral: {
+      signup: parseInt(process.env.REFERRAL_SIGNUP) || 50,
+      firstPurchase: parseInt(process.env.REFERRAL_FIRST_PURCHASE) || 200
+    }
+  },
+  
+  // ===== WATCH TIME SYSTEM =====
+  watchTime: {
+    minWatchMinutes: parseInt(process.env.MIN_WATCH_MINUTES) || 2,
+    maxWatchMinutes: parseInt(process.env.MAX_WATCH_MINUTES) || 60,
+    maxParticipantsPerRoom: parseInt(process.env.MAX_ROOM_PARTICIPANTS) || 50,
+    verificationInterval: parseInt(process.env.WATCH_VERIFICATION_INTERVAL) || 30, // seconds
+    roomExpiryHours: parseInt(process.env.ROOM_EXPIRY_HOURS) || 24
+  },
+  
+  // ===== QUALITY SCORE =====
+  quality: {
+    minScoreForMatching: parseInt(process.env.MIN_QUALITY_SCORE) || 20,
+    tierDifferenceLimit: parseInt(process.env.QUALITY_TIER_DIFF) || 2, // Max tier difference for matching
+    updateInterval: parseInt(process.env.QUALITY_UPDATE_INTERVAL) || 86400000 // 24 hours
+  },
+  
+  // ===== MATCHING SYSTEM =====
+  matching: {
+    maxMatches: parseInt(process.env.MAX_MATCHES) || 20,
+    similarCategoryBonus: parseFloat(process.env.SIMILAR_CATEGORY_BONUS) || 1.2,
+    sameSizeRangeBonus: parseFloat(process.env.SAME_SIZE_BONUS) || 1.1,
+    premiumPriorityBoost: parseFloat(process.env.PREMIUM_PRIORITY) || 2.0
   }
 };

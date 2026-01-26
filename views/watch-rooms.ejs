@@ -1,0 +1,534 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="display-4 fw-bold text-gradient">
+            <i class="fas fa-play-circle me-2"></i>Watch Time Exchange
+          </h1>
+          <p class="lead text-muted">Earn credits by watching videos, grow your watch-time organically</p>
+        </div>
+        <div>
+          <button class="btn btn-danger btn-lg px-4" data-bs-toggle="modal" data-bs-target="#createRoomModal">
+            <i class="fas fa-plus-circle me-2"></i>Create Room
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Stats Card -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-coins fa-2x text-warning mb-2"></i>
+          <h5 class="mb-0"><%= user.credits || 0 %></h5>
+          <small class="text-muted">Available Credits</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+          <h5 class="mb-0"><%= user.stats?.totalWatchTimeGiven || 0 %></h5>
+          <small class="text-muted">Minutes Watched</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-video fa-2x text-danger mb-2"></i>
+          <h5 class="mb-0"><%= user.stats?.totalWatchTimeReceived || 0 %></h5>
+          <small class="text-muted">Minutes Received</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-trophy fa-2x text-success mb-2"></i>
+          <h5 class="mb-0"><%= user.getQualityTier ? user.getQualityTier() : 'N/A' %></h5>
+          <small class="text-muted">Quality Tier</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Sessions Alert -->
+  <div id="active-sessions-alert" class="d-none">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>You have active watch sessions!</strong> 
+      <a href="#my-sessions" class="alert-link">View them below</a>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label small text-muted">Category</label>
+          <select class="form-select" id="filterCategory">
+            <option value="">All Categories</option>
+            <option value="Gaming">Gaming</option>
+            <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Tech">Tech</option>
+            <option value="Music">Music</option>
+            <option value="Vlog">Vlog</option>
+            <option value="Business">Business</option>
+            <option value="Fitness">Fitness</option>
+            <option value="Cooking">Cooking</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted">Content Type</label>
+          <select class="form-select" id="filterContentType">
+            <option value="">All Types</option>
+            <option value="video">Long Videos</option>
+            <option value="short">Shorts</option>
+            <option value="playlist">Playlists</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted">Language</label>
+          <select class="form-select" id="filterLanguage">
+            <option value="">All Languages</option>
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn btn-primary w-100" onclick="applyFilters()">
+            <i class="fas fa-filter me-2"></i>Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Rooms -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h3 class="mb-3">
+        <i class="fas fa-door-open me-2"></i>Available Watch Rooms
+        <span class="badge bg-danger" id="room-count">0</span>
+      </h3>
+      
+      <div id="rooms-container" class="row g-4">
+        <!-- Rooms will be loaded here via JavaScript -->
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted mt-3">Loading watch rooms...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Active Sessions -->
+  <div class="row" id="my-sessions">
+    <div class="col-12">
+      <h3 class="mb-3">
+        <i class="fas fa-tasks me-2"></i>My Active Sessions
+        <span class="badge bg-primary" id="session-count">0</span>
+      </h3>
+      
+      <div id="sessions-container">
+        <p class="text-muted">No active sessions</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Room Modal -->
+<div class="modal fade" id="createRoomModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Create Watch Time Room</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createRoomForm">
+          <div class="mb-3">
+            <label class="form-label">Video/Playlist URL *</label>
+            <input type="url" class="form-control" name="contentUrl" required 
+                   placeholder="https://www.youtube.com/watch?v=...">
+            <small class="text-muted">Paste your YouTube video or playlist URL</small>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Video Title *</label>
+            <input type="text" class="form-control" name="contentTitle" required 
+                   placeholder="My Awesome Video">
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Content Type *</label>
+              <select class="form-select" name="contentType" required>
+                <option value="video">Long Video</option>
+                <option value="short">Short</option>
+                <option value="playlist">Playlist</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Required Watch Time (minutes) *</label>
+              <input type="number" class="form-control" name="requiredWatchMinutes" 
+                     min="2" max="60" value="5" required>
+              <small class="text-muted">Minimum: 2, Maximum: 60</small>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Max Participants</label>
+              <input type="number" class="form-control" name="maxParticipants" 
+                     min="1" max="100" value="50">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Category</label>
+              <select class="form-select" name="category">
+                <option value="<%= user.channelCategory %>"><%= user.channelCategory %> (Your Category)</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Education">Education</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Tech">Tech</option>
+                <option value="Music">Music</option>
+                <option value="Vlog">Vlog</option>
+                <option value="Business">Business</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Cooking">Cooking</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="isPublic" id="isPublic" checked>
+              <label class="form-check-label" for="isPublic">
+                Make room publicly visible
+              </label>
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Cost Calculation:</strong>
+            <p class="mb-0" id="cost-preview">
+              <span id="costMinutes">5</span> minutes × 
+              <span id="costParticipants">50</span> participants × 
+              <span id="costPerMinute">1</span> credit/min = 
+              <strong><span id="totalCost">250</span> credits</strong>
+            </p>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="createRoom()">
+          <i class="fas fa-check me-2"></i>Create Room
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Watch Room Card Template (Hidden) -->
+<template id="room-card-template">
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm hover-lift h-100 room-card" data-room-id="">
+      <div class="position-relative">
+        <img src="" class="card-img-top room-thumbnail" alt="Video thumbnail" style="height: 200px; object-fit: cover;">
+        <span class="badge bg-danger position-absolute top-0 end-0 m-2 room-type"></span>
+        <div class="position-absolute bottom-0 start-0 m-2">
+          <span class="badge bg-dark room-category"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title room-title text-truncate"></h6>
+        <p class="text-muted small mb-2">
+          <i class="fas fa-user me-1"></i><span class="room-creator"></span>
+        </p>
+        
+        <div class="row g-2 mb-3 small">
+          <div class="col-6">
+            <i class="fas fa-clock text-primary me-1"></i>
+            <span class="room-minutes"></span> min
+          </div>
+          <div class="col-6">
+            <i class="fas fa-coins text-warning me-1"></i>
+            <span class="room-credits"></span> credits
+          </div>
+          <div class="col-6">
+            <i class="fas fa-users text-success me-1"></i>
+            <span class="room-participants"></span>
+          </div>
+          <div class="col-6">
+            <i class="fas fa-trophy text-info me-1"></i>
+            <span class="room-match"></span>% match
+          </div>
+        </div>
+        
+        <button class="btn btn-danger btn-sm w-100 join-room-btn">
+          <i class="fas fa-play me-1"></i>Join & Watch
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+  
+  .room-card {
+    transition: all 0.3s ease;
+  }
+  
+  .room-card:hover {
+    border-color: #dc3545;
+  }
+</style>
+
+<script>
+// Load rooms on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadRooms();
+  loadMySessions();
+  
+  // Auto-refresh every 30 seconds
+  setInterval(loadRooms, 30000);
+  setInterval(loadMySessions, 15000);
+  
+  // Update cost preview in real-time
+  document.querySelector('[name="requiredWatchMinutes"]').addEventListener('input', updateCostPreview);
+  document.querySelector('[name="maxParticipants"]').addEventListener('input', updateCostPreview);
+});
+
+// Load available rooms
+async function loadRooms() {
+  try {
+    const category = document.getElementById('filterCategory').value;
+    const contentType = document.getElementById('filterContentType').value;
+    const language = document.getElementById('filterLanguage').value;
+    
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    if (contentType) params.append('contentType', contentType);
+    if (language) params.append('language', language);
+    
+    const response = await fetch(`/api/watch/rooms?${params}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      displayRooms(data.rooms);
+    }
+  } catch (error) {
+    console.error('Error loading rooms:', error);
+  }
+}
+
+// Display rooms
+function displayRooms(rooms) {
+  const container = document.getElementById('rooms-container');
+  const template = document.getElementById('room-card-template');
+  
+  document.getElementById('room-count').textContent = rooms.length;
+  
+  if (rooms.length === 0) {
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+        <p class="text-muted">No watch rooms available. Be the first to create one!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = '';
+  
+  rooms.forEach(room => {
+    const card = template.content.cloneNode(true);
+    
+    card.querySelector('.room-card').dataset.roomId = room._id;
+    card.querySelector('.room-thumbnail').src = room.thumbnailUrl || 'https://img.youtube.com/vi/default.jpg';
+    card.querySelector('.room-type').textContent = room.contentType.toUpperCase();
+    card.querySelector('.room-category').textContent = room.category;
+    card.querySelector('.room-title').textContent = room.contentTitle;
+    card.querySelector('.room-creator').textContent = room.creatorId.username;
+    card.querySelector('.room-minutes').textContent = room.requiredWatchMinutes;
+    card.querySelector('.room-credits').textContent = room.creditsPerMinute * room.requiredWatchMinutes;
+    card.querySelector('.room-participants').textContent = `${room.currentParticipants}/${room.maxParticipants}`;
+    card.querySelector('.room-match').textContent = room.matchScore || 100;
+    
+    card.querySelector('.join-room-btn').onclick = () => joinRoom(room._id);
+    
+    container.appendChild(card);
+  });
+}
+
+// Join a room
+async function joinRoom(roomId) {
+  if (!confirm('Join this watch room? You will need to watch the required duration to earn credits.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/watch/rooms/${roomId}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Joined successfully! Redirecting to watch session...');
+      window.location.href = `/watch/session/${data.session._id}`;
+    } else {
+      alert(data.message || 'Failed to join room');
+    }
+  } catch (error) {
+    console.error('Error joining room:', error);
+    alert('Error joining room');
+  }
+}
+
+// Create room
+async function createRoom() {
+  const form = document.getElementById('createRoomForm');
+  const formData = new FormData(form);
+  
+  const data = {
+    contentUrl: formData.get('contentUrl'),
+    contentTitle: formData.get('contentTitle'),
+    contentType: formData.get('contentType'),
+    requiredWatchMinutes: parseInt(formData.get('requiredWatchMinutes')),
+    maxParticipants: parseInt(formData.get('maxParticipants')),
+    isPublic: formData.get('isPublic') === 'on',
+    category: formData.get('category')
+  };
+  
+  try {
+    const response = await fetch('/api/watch/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('Room created successfully!');
+      bootstrap.Modal.getInstance(document.getElementById('createRoomModal')).hide();
+      form.reset();
+      loadRooms();
+    } else {
+      alert(result.message || 'Failed to create room');
+    }
+  } catch (error) {
+    console.error('Error creating room:', error);
+    alert('Error creating room');
+  }
+}
+
+// Load my active sessions
+async function loadMySessions() {
+  try {
+    const response = await fetch('/api/watch/my-sessions');
+    const data = await response.json();
+    
+    if (data.success && data.sessions.length > 0) {
+      document.getElementById('session-count').textContent = data.sessions.length;
+      document.getElementById('active-sessions-alert').classList.remove('d-none');
+      displaySessions(data.sessions);
+    }
+  } catch (error) {
+    console.error('Error loading sessions:', error);
+  }
+}
+
+// Display sessions
+function displaySessions(sessions) {
+  const container = document.getElementById('sessions-container');
+  
+  if (sessions.length === 0) {
+    container.innerHTML = '<p class="text-muted">No active sessions</p>';
+    return;
+  }
+  
+  container.innerHTML = sessions.map(session => `
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h6 class="mb-1">${session.roomId.contentTitle}</h6>
+            <small class="text-muted">By ${session.roomId.creatorId.username}</small>
+          </div>
+          <div class="col-md-3">
+            <div class="progress" style="height: 25px;">
+              <div class="progress-bar bg-danger" style="width: ${session.progressPercentage}%">
+                ${session.progressPercentage}%
+              </div>
+            </div>
+            <small class="text-muted">${session.minutesWatched}/${session.requiredMinutes} minutes</small>
+          </div>
+          <div class="col-md-3 text-end">
+            <a href="/watch/session/${session._id}" class="btn btn-sm btn-danger">
+              <i class="fas fa-play me-1"></i>Continue Watching
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Update cost preview
+function updateCostPreview() {
+  const minutes = parseInt(document.querySelector('[name="requiredWatchMinutes"]').value) || 5;
+  const participants = parseInt(document.querySelector('[name="maxParticipants"]').value) || 50;
+  const perMinute = 1; // From config
+  const total = minutes * participants * perMinute;
+  
+  document.getElementById('costMinutes').textContent = minutes;
+  document.getElementById('costParticipants').textContent = participants;
+  document.getElementById('costPerMinute').textContent = perMinute;
+  document.getElementById('totalCost').textContent = total;
+}
+
+// Apply filters
+function applyFilters() {
+  loadRooms();
+}
+</script>
+
+<%- include('partials/footer') %>

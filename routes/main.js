@@ -11,6 +11,8 @@ const Subscription = require('../models/Subscription');
 const Payment = require('../models/Payment');
 const Content = require('../models/Content');
 const Notification = require('../models/Notification');
+const WatchRoom = require('../models/WatchRoom');
+const WatchSession = require('../models/WatchSession');
 
 // Apply banned check to all routes
 router.use(checkBanned);
@@ -424,6 +426,104 @@ router.post('/notification/clear-all', isAuthenticated, async (req, res) => {
     req.session.messageType = 'error';
   }
   res.redirect('/notification');
+});
+
+// ===== WATCH TIME EXCHANGE ROUTES =====
+
+// Watch rooms listing page
+router.get('/watch-rooms', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    
+    res.render('watch-rooms', {
+      pageTitle: 'Watch Time Exchange - SUB4SUB',
+      user
+    });
+  } catch (error) {
+    console.error('Watch rooms page error:', error);
+    req.session.message = 'Error loading watch rooms';
+    req.session.messageType = 'error';
+    res.redirect('/');
+  }
+});
+
+// Watch session page
+router.get('/watch/session/:sessionId', isAuthenticated, async (req, res) => {
+  try {
+    const session = await WatchSession.findOne({
+      _id: req.params.sessionId,
+      userId: req.session.user._id
+    });
+    
+    if (!session) {
+      req.session.message = 'Session not found';
+      req.session.messageType = 'error';
+      return res.redirect('/watch-rooms');
+    }
+    
+    if (session.status === 'completed') {
+      req.session.message = 'This session is already completed';
+      req.session.messageType = 'info';
+      return res.redirect('/watch-rooms');
+    }
+    
+    res.render('watch-session', {
+      pageTitle: 'Watch Session - SUB4SUB',
+      sessionId: session._id.toString()
+    });
+  } catch (error) {
+    console.error('Watch session page error:', error);
+    req.session.message = 'Error loading watch session';
+    req.session.messageType = 'error';
+    res.redirect('/watch-rooms');
+  }
+});
+
+// Referrals page
+router.get('/referrals', isAuthenticated, async (req, res) => {
+  try {
+    res.render('referrals', {
+      pageTitle: 'Referral Program - SUB4SUB'
+    });
+  } catch (error) {
+    console.error('Referrals page error:', error);
+    req.session.message = 'Error loading referrals';
+    req.session.messageType = 'error';
+    res.redirect('/');
+  }
+});
+
+// API endpoint to get session details (for watch-session page)
+router.get('/api/watch/sessions/:sessionId/details', isAuthenticated, async (req, res) => {
+  try {
+    const session = await WatchSession.findOne({
+      _id: req.params.sessionId,
+      userId: req.session.user._id
+    });
+    
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+    
+    const room = await WatchRoom.findById(session.roomId)
+      .populate('creatorId', 'username youtubeChannelName');
+    
+    if (!room) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+    
+    res.json({
+      success: true,
+      session: session,
+      room: room
+    });
+  } catch (error) {
+    console.error('Get session details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching session details'
+    });
+  }
 });
 
 module.exports = router;

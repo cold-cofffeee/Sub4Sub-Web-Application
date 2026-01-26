@@ -16,6 +16,8 @@ const {
 const User = require('../models/User');
 const emailService = require('../utils/emailService');
 const { generateToken } = require('../utils/helpers');
+const referralController = require('../controllers/referralController');
+const config = require('../config/config');
 
 // Login page
 router.get('/login', isGuest, (req, res) => {
@@ -96,8 +98,11 @@ router.post('/login', validateLogin, checkValidation, async (req, res) => {
 
 // Register page
 router.get('/register', isGuest, (req, res) => {
+  const referralCode = req.query.ref || '';
+  
   res.render('auth/register', {
-    pageTitle: 'Register - SUB4SUB'
+    pageTitle: 'Register - SUB4SUB',
+    referralCode
   });
 });
 
@@ -110,7 +115,8 @@ router.post('/register', validateRegistration, checkValidation, async (req, res)
       password, 
       youtubeChannelName, 
       youtubeChannelUrl,
-      locationAddress 
+      locationAddress,
+      referralCode
     } = req.body;
     
     // Check if user already exists
@@ -127,7 +133,7 @@ router.post('/register', validateRegistration, checkValidation, async (req, res)
       return res.redirect('/auth/register');
     }
     
-    // Create new user
+    // Create new user with starting credits
     const user = new User({
       email: email.toLowerCase(),
       username,
@@ -135,10 +141,19 @@ router.post('/register', validateRegistration, checkValidation, async (req, res)
       youtubeChannelName: youtubeChannelName || '',
       youtubeChannel: youtubeChannelUrl || '',
       locationAddress: locationAddress || '',
-      emailVerificationToken: generateToken()
+      emailVerificationToken: generateToken(),
+      credits: config.credits.signupBonus || 100 // Starting credits
     });
     
     await user.save();
+    
+    // Process referral if code provided
+    if (referralCode) {
+      await referralController.processReferralSignup(referralCode, user._id, req);
+    }
+    
+    // Generate referral code for new user
+    await user.generateReferralCode();
     
     // Send welcome email
     await emailService.sendWelcomeEmail(user);

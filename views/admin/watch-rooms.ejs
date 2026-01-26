@@ -1,0 +1,424 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2">
+      <div class="list-group">
+        <a href="/admin/dashboard" class="list-group-item list-group-item-action">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a href="/admin/users" class="list-group-item list-group-item-action">
+          <i class="fas fa-users me-2"></i>Users
+        </a>
+        <a href="/admin/verify-users" class="list-group-item list-group-item-action">
+          <i class="fas fa-user-check me-2"></i>Verify Users
+        </a>
+        <a href="/admin/watch-rooms" class="list-group-item list-group-item-action active">
+          <i class="fas fa-play-circle me-2"></i>Watch Rooms
+        </a>
+        <a href="/admin/quality-scores" class="list-group-item list-group-item-action">
+          <i class="fas fa-chart-line me-2"></i>Quality Scores
+        </a>
+        <a href="/admin/referrals" class="list-group-item list-group-item-action">
+          <i class="fas fa-users-cog me-2"></i>Referrals
+        </a>
+        <a href="/admin/payments" class="list-group-item list-group-item-action">
+          <i class="fas fa-credit-card me-2"></i>Payments
+        </a>
+        <a href="/admin/settings" class="list-group-item list-group-item-action">
+          <i class="fas fa-cog me-2"></i>Settings
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9 col-lg-10">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-play-circle me-2"></i>Watch Room Management</h2>
+        <button class="btn btn-danger" onclick="refreshData()">
+          <i class="fas fa-sync-alt me-2"></i>Refresh
+        </button>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h6 class="card-title">Active Rooms</h6>
+              <h3 id="stat-active">0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <h6 class="card-title">Total Sessions</h6>
+              <h3 id="stat-sessions">0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-warning text-white">
+            <div class="card-body">
+              <h6 class="card-title">Flagged Rooms</h6>
+              <h3 id="stat-flagged">0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-info text-white">
+            <div class="card-body">
+              <h6 class="card-title">Total Watch Time</h6>
+              <h3 id="stat-watch-time">0 hrs</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <select class="form-select" id="filterStatus">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="filterCategory">
+                <option value="">All Categories</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Education">Education</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Tech">Tech</option>
+                <option value="Music">Music</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" id="filterCreator" placeholder="Search by creator...">
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-primary w-100" onclick="applyFilters()">
+                <i class="fas fa-filter me-2"></i>Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rooms Table -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">All Watch Rooms</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="roomsTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Creator</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Duration</th>
+                  <th>Participants</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="roomsTableBody">
+                <tr>
+                  <td colspan="10" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Room Details Modal -->
+<div class="modal fade" id="roomModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Room Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="roomDetails">
+        Loading...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-warning" onclick="flagRoom()">
+          <i class="fas fa-flag me-2"></i>Flag Room
+        </button>
+        <button type="button" class="btn btn-danger" onclick="deleteRoom()">
+          <i class="fas fa-trash me-2"></i>Delete Room
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentRoomId = null;
+let allRooms = [];
+
+// Load rooms on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadRooms();
+});
+
+// Load all rooms
+async function loadRooms() {
+  try {
+    const response = await fetch('/admin/api/watch-rooms');
+    const data = await response.json();
+    
+    if (data.success) {
+      allRooms = data.rooms;
+      updateStats(data.stats);
+      displayRooms(allRooms);
+    }
+  } catch (error) {
+    console.error('Error loading rooms:', error);
+    alert('Error loading rooms');
+  }
+}
+
+// Update stats
+function updateStats(stats) {
+  document.getElementById('stat-active').textContent = stats.activeRooms || 0;
+  document.getElementById('stat-sessions').textContent = stats.totalSessions || 0;
+  document.getElementById('stat-flagged').textContent = stats.flaggedRooms || 0;
+  document.getElementById('stat-watch-time').textContent = 
+    Math.round((stats.totalWatchTime || 0) / 60) + ' hrs';
+}
+
+// Display rooms
+function displayRooms(rooms) {
+  const tbody = document.getElementById('roomsTableBody');
+  
+  if (rooms.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center text-muted py-4">No rooms found</td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = rooms.map(room => `
+    <tr class="${room.isFlagged ? 'table-warning' : ''}">
+      <td><code>${room._id.substring(0, 8)}...</code></td>
+      <td>
+        <a href="/admin/users?id=${room.creatorId._id}">
+          ${room.creatorId.username}
+        </a>
+      </td>
+      <td class="text-truncate" style="max-width: 200px;">
+        ${room.contentTitle}
+        ${room.isFlagged ? '<i class="fas fa-flag text-warning ms-2"></i>' : ''}
+      </td>
+      <td><span class="badge bg-secondary">${room.contentType}</span></td>
+      <td>${room.category}</td>
+      <td>${room.requiredWatchMinutes} min</td>
+      <td>
+        <span class="badge ${room.currentParticipants >= room.maxParticipants ? 'bg-danger' : 'bg-success'}">
+          ${room.currentParticipants}/${room.maxParticipants}
+        </span>
+      </td>
+      <td>
+        <span class="badge bg-${
+          room.status === 'active' ? 'success' : 
+          room.status === 'completed' ? 'primary' : 
+          room.status === 'cancelled' ? 'danger' : 'warning'
+        }">
+          ${room.status}
+        </span>
+      </td>
+      <td>${new Date(room.createdAt).toLocaleDateString()}</td>
+      <td>
+        <button class="btn btn-sm btn-info" onclick="viewRoom('${room._id}')">
+          <i class="fas fa-eye"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// View room details
+async function viewRoom(roomId) {
+  currentRoomId = roomId;
+  
+  try {
+    const response = await fetch(`/admin/api/watch-rooms/${roomId}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const room = data.room;
+      const sessions = data.sessions || [];
+      
+      document.getElementById('roomDetails').innerHTML = `
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Room Information</h6>
+            <table class="table table-sm">
+              <tr><th>Creator:</th><td>${room.creatorId.username}</td></tr>
+              <tr><th>Title:</th><td>${room.contentTitle}</td></tr>
+              <tr><th>URL:</th><td><a href="${room.contentUrl}" target="_blank">View Video</a></td></tr>
+              <tr><th>Type:</th><td>${room.contentType}</td></tr>
+              <tr><th>Category:</th><td>${room.category}</td></tr>
+              <tr><th>Duration:</th><td>${room.requiredWatchMinutes} minutes</td></tr>
+              <tr><th>Credits/min:</th><td>${room.creditsPerMinute}</td></tr>
+              <tr><th>Status:</th><td><span class="badge bg-${room.status === 'active' ? 'success' : 'secondary'}">${room.status}</span></td></tr>
+              <tr><th>Created:</th><td>${new Date(room.createdAt).toLocaleString()}</td></tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6>Statistics</h6>
+            <table class="table table-sm">
+              <tr><th>Participants:</th><td>${room.currentParticipants}/${room.maxParticipants}</td></tr>
+              <tr><th>Total Views:</th><td>${room.totalViews}</td></tr>
+              <tr><th>Total Minutes:</th><td>${room.totalMinutesWatched}</td></tr>
+              <tr><th>Credits Spent:</th><td>${room.totalCreditsSpent}</td></tr>
+              <tr><th>Completion Rate:</th><td>${room.completionRate}%</td></tr>
+              <tr><th>Flagged:</th><td>${room.isFlagged ? '<span class="badge bg-warning">Yes</span>' : 'No'}</td></tr>
+              ${room.isFlagged ? `<tr><th>Flag Reason:</th><td>${room.flagReason}</td></tr>` : ''}
+            </table>
+          </div>
+        </div>
+        
+        <h6 class="mt-3">Active Sessions (${sessions.length})</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Started</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sessions.map(s => `
+                <tr>
+                  <td>${s.userId.username}</td>
+                  <td>
+                    <div class="progress" style="height: 20px;">
+                      <div class="progress-bar" style="width: ${s.progressPercentage}%">
+                        ${s.progressPercentage}%
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-${s.status === 'completed' ? 'success' : 'warning'}">${s.status}</span></td>
+                  <td>${new Date(s.startedAt).toLocaleTimeString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      const modal = new bootstrap.Modal(document.getElementById('roomModal'));
+      modal.show();
+    }
+  } catch (error) {
+    console.error('Error loading room details:', error);
+    alert('Error loading room details');
+  }
+}
+
+// Flag room
+async function flagRoom() {
+  const reason = prompt('Enter flag reason:');
+  if (!reason) return;
+  
+  try {
+    const response = await fetch(`/admin/api/watch-rooms/${currentRoomId}/flag`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Room flagged successfully');
+      bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+      loadRooms();
+    } else {
+      alert(data.message || 'Error flagging room');
+    }
+  } catch (error) {
+    console.error('Error flagging room:', error);
+    alert('Error flagging room');
+  }
+}
+
+// Delete room
+async function deleteRoom() {
+  if (!confirm('Are you sure you want to delete this room? This will cancel all active sessions.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/admin/api/watch-rooms/${currentRoomId}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Room deleted successfully');
+      bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+      loadRooms();
+    } else {
+      alert(data.message || 'Error deleting room');
+    }
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    alert('Error deleting room');
+  }
+}
+
+// Apply filters
+function applyFilters() {
+  const status = document.getElementById('filterStatus').value;
+  const category = document.getElementById('filterCategory').value;
+  const creator = document.getElementById('filterCreator').value.toLowerCase();
+  
+  const filtered = allRooms.filter(room => {
+    if (status && room.status !== status) return false;
+    if (category && room.category !== category) return false;
+    if (creator && !room.creatorId.username.toLowerCase().includes(creator)) return false;
+    return true;
+  });
+  
+  displayRooms(filtered);
+}
+
+// Refresh data
+function refreshData() {
+  loadRooms();
+}
+</script>
+
+<%- include('../partials/footer') %>

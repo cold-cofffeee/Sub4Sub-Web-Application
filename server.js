@@ -103,6 +103,11 @@ app.use('/api', apiRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+// ===== BACKGROUND TASKS =====
+// Start quality score scheduler (runs every 24 hours)
+const qualityScoreUpdater = require('./utils/qualityScoreUpdater');
+qualityScoreUpdater.startQualityScoreScheduler();
+
 // Start server
 const PORT = config.port;
 app.listen(PORT, () => {
@@ -114,6 +119,7 @@ app.listen(PORT, () => {
 ║   Port: ${PORT.toString().padEnd(30)} ║
 ║   MongoDB: Connected                   ║
 ║   URL: ${config.app.url.padEnd(29)} ║
+║   Quality Scheduler: Active            ║
 ╚════════════════════════════════════════╝
   `);
 });

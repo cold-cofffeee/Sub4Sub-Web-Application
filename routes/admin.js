@@ -11,6 +11,9 @@ const Payment = require('../models/Payment');
 const Subscription = require('../models/Subscription');
 const Notification = require('../models/Notification');
 const Content = require('../models/Content');
+const WatchRoom = require('../models/WatchRoom');
+const WatchSession = require('../models/WatchSession');
+const Referral = require('../models/Referral');
 const { paginate } = require('../utils/helpers');
 
 // Apply authentication to all admin routes
@@ -553,6 +556,217 @@ router.post('/settings/security', async (req, res) => {
     req.session.messageType = 'error';
   }
   res.redirect('/admin/settings');
+});
+
+// ===== WATCH ROOMS MANAGEMENT =====
+
+// Watch rooms page
+router.get('/watch-rooms', async (req, res) => {
+  try {
+    res.render('admin/watch-rooms', {
+      pageTitle: 'Watch Rooms Management - Admin'
+    });
+  } catch (error) {
+    console.error('Watch rooms page error:', error);
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// API: Get all watch rooms
+router.get('/api/watch-rooms', async (req, res) => {
+  try {
+    const rooms = await WatchRoom.find()
+      .populate('creatorId', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(500);
+    
+    // Calculate stats
+    const stats = {
+      activeRooms: await WatchRoom.countDocuments({ status: 'active' }),
+      totalSessions: await WatchSession.countDocuments(),
+      flaggedRooms: await WatchRoom.countDocuments({ isFlagged: true }),
+      totalWatchTime: await WatchSession.aggregate([
+        { $group: { _id: null, total: { $sum: '$minutesWatched' } } }
+      ]).then(r => r[0]?.total || 0)
+    };
+    
+    res.json({
+      success: true,
+      rooms,
+      stats
+    });
+  } catch (error) {
+    console.error('Get watch rooms error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching watch rooms'
+    });
+  }
+});
+
+// API: Get room details
+router.get('/api/watch-rooms/:id', async (req, res) => {
+  try {
+    const room = await WatchRoom.findById(req.params.id)
+      .populate('creatorId', 'username email');
+    
+    if (!room) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+    
+    const sessions = await WatchSession.find({ roomId: room._id })
+      .populate('userId', 'username')
+      .sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      room,
+      sessions
+    });
+  } catch (error) {
+    console.error('Get room details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching room details'
+    });
+  }
+});
+
+// API: Flag a room
+router.put('/api/watch-rooms/:id/flag', async (req, res) => {
+  try {
+    const { reason } = req.body;
+    
+    const room = await WatchRoom.findByIdAndUpdate(
+      req.params.id,
+      {
+        isFlagged: true,
+        flagReason: reason || 'Flagged by admin'
+      },
+      { new: true }
+    );
+    
+    if (!room) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Room flagged successfully'
+    });
+  } catch (error) {
+    console.error('Flag room error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error flagging room'
+    });
+  }
+});
+
+// API: Delete a room
+router.delete('/api/watch-rooms/:id', async (req, res) => {
+  try {
+    const room = await WatchRoom.findById(req.params.id);
+    
+    if (!room) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+    
+    // Cancel all active sessions
+    await WatchSession.updateMany(
+      { roomId: room._id, status: 'active' },
+      { $set: { status: 'abandoned' } }
+    );
+    
+    // Delete room
+    await room.deleteOne();
+    
+    res.json({
+      success: true,
+      message: 'Room deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete room error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting room'
+    });
+  }
+});
+
+// ===== QUALITY SCORES MANAGEMENT =====
+
+// Quality scores page
+router.get('/quality-scores', async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('username email qualityScore qualityMetrics isPremium createdAt')
+      .sort({ qualityScore: -1 })
+      .limit(100);
+    
+    res.render('admin/quality-scores', {
+      pageTitle: 'Quality Scores - Admin',
+      users
+    });
+  } catch (error) {
+    console.error('Quality scores page error:', error);
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// API: Update user quality score
+router.put('/api/quality/:userId', async (req, res) => {
+  try {
+    const { manualAdjustment } = req.body;
+    
+    const user = await User.findById(req.params.userId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    user.qualityMetrics.manualAdjustment = parseInt(manualAdjustment) || 0;
+    await user.updateQualityScore();
+    
+    res.json({
+      success: true,
+      newScore: user.qualityScore
+    });
+  } catch (error) {
+    console.error('Update quality score error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating quality score'
+    });
+  }
+});
+
+// ===== REFERRALS MANAGEMENT =====
+
+// Referrals page
+router.get('/referrals', async (req, res) => {
+  try {
+    const referrals = await Referral.find()
+      .populate('referrerId', 'username email')
+      .populate('refereeId', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(100);
+    
+    const stats = {
+      total: await Referral.countDocuments(),
+      completed: await Referral.countDocuments({ status: 'completed' }),
+      rewarded: await Referral.countDocuments({ status: 'rewarded' })
+    };
+    
+    res.render('admin/referrals', {
+      pageTitle: 'Referrals Management - Admin',
+      referrals,
+      stats
+    });
+  } catch (error) {
+    console.error('Referrals page error:', error);
+    res.redirect('/admin/dashboard');
+  }
 });
 
 // Admin logout

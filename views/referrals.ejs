@@ -1,0 +1,437 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-12 text-center">
+      <h1 class="display-4 fw-bold mb-3">
+        <i class="fas fa-users-cog me-3 text-primary"></i>Referral Program
+      </h1>
+      <p class="lead text-muted">Invite friends and earn rewards together!</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-5 g-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift border-0 h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-users fa-3x text-primary"></i>
+          </div>
+          <h2 class="mb-0" id="total-referrals">0</h2>
+          <p class="text-muted mb-0">Total Referrals</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift border-0 h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-check-circle fa-3x text-success"></i>
+          </div>
+          <h2 class="mb-0" id="completed-referrals">0</h2>
+          <p class="text-muted mb-0">Active Referrals</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift border-0 h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-coins fa-3x text-warning"></i>
+          </div>
+          <h2 class="mb-0" id="credits-earned">0</h2>
+          <p class="text-muted mb-0">Credits Earned</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card shadow-sm hover-lift border-0 h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-clock fa-3x text-info"></i>
+          </div>
+          <h2 class="mb-0" id="pending-referrals">0</h2>
+          <p class="text-muted mb-0">Pending</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Referral Link Card -->
+  <div class="row mb-5">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient text-white py-3">
+          <h4 class="mb-0">
+            <i class="fas fa-link me-2"></i>Your Referral Link
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          <div class="alert alert-info">
+            <i class="fas fa-gift me-2"></i>
+            <strong>Earn Rewards:</strong> Get <span class="badge bg-warning text-dark">50 credits</span> per signup + 
+            <span class="badge bg-success">200 credits</span> when they make their first purchase!
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label fw-bold">Referral Code:</label>
+            <div class="input-group input-group-lg">
+              <input type="text" class="form-control" id="referral-code" readonly>
+              <button class="btn btn-primary" onclick="copyCode()">
+                <i class="fas fa-copy me-2"></i>Copy Code
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label fw-bold">Referral Link:</label>
+            <div class="input-group input-group-lg">
+              <input type="text" class="form-control" id="referral-url" readonly>
+              <button class="btn btn-success" onclick="copyUrl()">
+                <i class="fas fa-copy me-2"></i>Copy Link
+              </button>
+            </div>
+          </div>
+          
+          <!-- Social Share Buttons -->
+          <div class="text-center">
+            <p class="text-muted mb-3">Share on social media:</p>
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary" onclick="shareTwitter()">
+                <i class="fab fa-twitter me-2"></i>Twitter
+              </button>
+              <button class="btn btn-outline-primary" onclick="shareFacebook()">
+                <i class="fab fa-facebook me-2"></i>Facebook
+              </button>
+              <button class="btn btn-outline-danger" onclick="shareEmail()">
+                <i class="fas fa-envelope me-2"></i>Email
+              </button>
+              <button class="btn btn-outline-success" onclick="shareWhatsApp()">
+                <i class="fab fa-whatsapp me-2"></i>WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h3 class="mb-4 text-center">
+        <i class="fas fa-question-circle me-2"></i>How It Works
+      </h3>
+      
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm text-center p-4">
+            <div class="mb-3">
+              <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                   style="width: 80px; height: 80px;">
+                <i class="fas fa-share-alt fa-2x text-primary"></i>
+              </div>
+            </div>
+            <h5 class="fw-bold">1. Share Your Link</h5>
+            <p class="text-muted">Copy your unique referral link and share it with friends, family, or on social media.</p>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm text-center p-4">
+            <div class="mb-3">
+              <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                   style="width: 80px; height: 80px;">
+                <i class="fas fa-user-plus fa-2x text-success"></i>
+              </div>
+            </div>
+            <h5 class="fw-bold">2. They Sign Up</h5>
+            <p class="text-muted">When someone registers using your link, you both get instant bonus credits!</p>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm text-center p-4">
+            <div class="mb-3">
+              <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                   style="width: 80px; height: 80px;">
+                <i class="fas fa-coins fa-2x text-warning"></i>
+              </div>
+            </div>
+            <h5 class="fw-bold">3. Earn Rewards</h5>
+            <p class="text-muted">Get additional bonuses when your referrals stay active and make purchases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Referrals -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="fas fa-history me-2"></i>Recent Referrals
+          </h5>
+        </div>
+        <div class="card-body">
+          <div id="referrals-list">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3">Loading referrals...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-gradient text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-trophy me-2"></i>Top Referrers
+          </h5>
+        </div>
+        <div class="card-body">
+          <div id="leaderboard-list">
+            <div class="text-center py-3">
+              <div class="spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+  }
+</style>
+
+<script>
+let referralData = null;
+
+// Load referral data on page load
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadReferralStats();
+  await loadLeaderboard();
+});
+
+// Load referral stats
+async function loadReferralStats() {
+  try {
+    const response = await fetch('/api/referrals/stats');
+    const data = await response.json();
+    
+    if (data.success) {
+      referralData = data;
+      
+      // Update stats
+      document.getElementById('total-referrals').textContent = data.stats.total;
+      document.getElementById('completed-referrals').textContent = data.stats.completed;
+      document.getElementById('credits-earned').textContent = data.stats.totalCreditsEarned;
+      document.getElementById('pending-referrals').textContent = data.stats.pending;
+      
+      // Update referral link
+      document.getElementById('referral-code').value = data.referralCode;
+      document.getElementById('referral-url').value = data.referralUrl;
+      
+      // Display recent referrals
+      displayReferrals(data.recentReferrals);
+    }
+  } catch (error) {
+    console.error('Error loading referral stats:', error);
+  }
+}
+
+// Display referrals list
+function displayReferrals(referrals) {
+  const container = document.getElementById('referrals-list');
+  
+  if (referrals.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-5 text-muted">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <p>No referrals yet. Start sharing your link!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Rewards</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${referrals.map(ref => `
+            <tr>
+              <td>
+                <i class="fas fa-user-circle me-2"></i>${ref.refereeId.username}
+                ${ref.refereeId.isPremium ? '<span class="badge bg-warning text-dark ms-2"><i class="fas fa-crown"></i></span>' : ''}
+              </td>
+              <td>${new Date(ref.createdAt).toLocaleDateString()}</td>
+              <td>
+                <span class="badge bg-${ref.status === 'rewarded' ? 'success' : ref.status === 'completed' ? 'info' : 'secondary'}">
+                  ${ref.status}
+                </span>
+              </td>
+              <td>
+                <span class="text-warning">
+                  <i class="fas fa-coins me-1"></i>
+                  ${(ref.signupReward || 0) + (ref.firstPurchaseReward || 0)} credits
+                </span>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Load leaderboard
+async function loadLeaderboard() {
+  try {
+    const response = await fetch('/api/referrals/leaderboard');
+    const data = await response.json();
+    
+    if (data.success) {
+      displayLeaderboard(data.leaderboard);
+    }
+  } catch (error) {
+    console.error('Error loading leaderboard:', error);
+  }
+}
+
+// Display leaderboard
+function displayLeaderboard(leaderboard) {
+  const container = document.getElementById('leaderboard-list');
+  
+  if (leaderboard.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-3">No data yet</p>';
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="list-group list-group-flush">
+      ${leaderboard.slice(0, 10).map((user, index) => `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge ${index < 3 ? 'bg-warning text-dark' : 'bg-secondary'} me-2">
+              ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '#' + (index + 1)}
+            </span>
+            <strong>${user.username}</strong>
+            ${user.isPremium ? '<span class="badge bg-warning text-dark ms-2"><i class="fas fa-crown"></i></span>' : ''}
+          </div>
+          <div>
+            <span class="badge bg-primary me-2">${user.referralCount} referrals</span>
+            <span class="badge bg-success">${user.referralCreditsEarned} credits</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Copy referral code
+function copyCode() {
+  const input = document.getElementById('referral-code');
+  input.select();
+  document.execCommand('copy');
+  
+  showToast('Referral code copied!');
+}
+
+// Copy referral URL
+function copyUrl() {
+  const input = document.getElementById('referral-url');
+  input.select();
+  document.execCommand('copy');
+  
+  showToast('Referral link copied!');
+}
+
+// Share on Twitter
+function shareTwitter() {
+  const text = encodeURIComponent('Join me on SUB4SUB and grow your YouTube channel! Use my referral link:');
+  const url = encodeURIComponent(referralData.referralUrl);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+// Share on Facebook
+function shareFacebook() {
+  const url = encodeURIComponent(referralData.referralUrl);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+}
+
+// Share via Email
+function shareEmail() {
+  const subject = encodeURIComponent('Join SUB4SUB with me!');
+  const body = encodeURIComponent(`Hi!\n\nI've been using SUB4SUB to grow my YouTube channel and thought you might be interested too!\n\nSign up using my referral link: ${referralData.referralUrl}\n\nWe'll both get bonus credits when you join!\n\nCheers!`);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+// Share on WhatsApp
+function shareWhatsApp() {
+  const text = encodeURIComponent(`Join me on SUB4SUB and grow your YouTube channel! Use my referral link: ${referralData.referralUrl}`);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+// Show toast notification
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'position-fixed bottom-0 end-0 p-3';
+  toast.style.zIndex = '9999';
+  toast.innerHTML = `
+    <div class="toast show" role="alert">
+      <div class="toast-header bg-success text-white">
+        <i class="fas fa-check-circle me-2"></i>
+        <strong class="me-auto">Success</strong>
+        <button type="button" class="btn-close btn-close-white" onclick="this.parentElement.parentElement.parentElement.remove()"></button>
+      </div>
+      <div class="toast-body">
+        ${message}
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+</script>
+
+<%- include('partials/footer') %>

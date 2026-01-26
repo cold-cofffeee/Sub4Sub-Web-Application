@@ -1,0 +1,485 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid py-4" style="max-width: 1400px;">
+  <div class="row">
+    <!-- Video Player Column -->
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0 mb-4">
+        <div class="card-body p-0">
+          <!-- Video Embed Area -->
+          <div id="video-container" class="ratio ratio-16x9 bg-dark">
+            <iframe 
+              id="video-player"
+              src=""
+              title="YouTube video player" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          
+          <!-- Video Info -->
+          <div class="p-4">
+            <h4 class="mb-2" id="video-title">Loading...</h4>
+            <p class="text-muted mb-3">
+              <i class="fas fa-user me-2"></i><span id="creator-name">...</span>
+              <span class="ms-3"><i class="fas fa-clock me-2"></i><span id="required-time">...</span> minutes required</span>
+            </p>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Keep this tab active and watch the video to earn credits.</strong>
+              Switching tabs or pausing too often may affect verification.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Progress & Stats Column -->
+    <div class="col-lg-4">
+      <!-- Progress Card -->
+      <div class="card shadow-lg border-0 mb-4" id="progress-card">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-chart-line me-2"></i>Watch Progress
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Timer Display -->
+          <div class="text-center mb-4">
+            <div class="display-3 fw-bold text-danger" id="timer-display">00:00</div>
+            <p class="text-muted mb-0">Time Watched</p>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="small">Progress</span>
+              <span class="small fw-bold" id="progress-percentage">0%</span>
+            </div>
+            <div class="progress" style="height: 30px;">
+              <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" 
+                   id="progress-bar" 
+                   role="progressbar" 
+                   style="width: 0%">
+                <span id="progress-text">0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats Grid -->
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <div class="p-3 bg-light rounded text-center">
+                <i class="fas fa-clock text-primary fa-2x mb-2"></i>
+                <div class="fw-bold" id="minutes-watched">0</div>
+                <small class="text-muted">Minutes</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 bg-light rounded text-center">
+                <i class="fas fa-coins text-warning fa-2x mb-2"></i>
+                <div class="fw-bold" id="credits-earning">0</div>
+                <small class="text-muted">Credits</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Session Status -->
+          <div id="session-status" class="alert alert-secondary">
+            <i class="fas fa-spinner fa-spin me-2"></i>Starting session...
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="d-grid gap-2">
+            <button class="btn btn-danger btn-lg" id="verify-btn" disabled>
+              <i class="fas fa-check-circle me-2"></i>Verify I'm Watching
+            </button>
+            <button class="btn btn-outline-danger" id="exit-btn" onclick="confirmExit()">
+              <i class="fas fa-sign-out-alt me-2"></i>Exit Session
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tips Card -->
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+          <h6 class="mb-0">
+            <i class="fas fa-lightbulb me-2 text-warning"></i>Tips for Success
+          </h6>
+        </div>
+        <div class="card-body">
+          <ul class="small mb-0 ps-3">
+            <li class="mb-2">Keep this tab active and focused</li>
+            <li class="mb-2">Don't mute or pause the video frequently</li>
+            <li class="mb-2">Click "Verify I'm Watching" when prompted</li>
+            <li class="mb-2">Complete the full required duration</li>
+            <li class="mb-0">Credits are awarded automatically upon completion</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Completion Modal -->
+<div class="modal fade" id="completionModal" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-trophy me-2"></i>Session Completed!
+        </h5>
+      </div>
+      <div class="modal-body text-center py-5">
+        <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+        <h4 class="mb-3">Congratulations!</h4>
+        <p class="lead mb-4">You've earned <strong id="final-credits" class="text-success">0</strong> credits!</p>
+        <p class="text-muted">Your new balance: <strong id="final-balance">0</strong> credits</p>
+      </div>
+      <div class="modal-footer">
+        <a href="/watch-rooms" class="btn btn-primary">Browse More Rooms</a>
+        <a href="/account" class="btn btn-success">View My Account</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verification Prompt Modal -->
+<div class="modal fade" id="verifyModal" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Verification Required
+        </h5>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="lead mb-3">Please confirm you're still watching!</p>
+        <p class="text-muted">Click the button below within 30 seconds</p>
+        <div class="display-4 fw-bold text-warning mb-3" id="verify-countdown">30</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning btn-lg w-100" onclick="submitVerification()">
+          <i class="fas fa-check me-2"></i>Yes, I'm Watching!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #video-container {
+    background: #000;
+  }
+  
+  #timer-display {
+    font-family: 'Courier New', monospace;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>
+
+<script>
+// Session data
+let sessionId = '<%= sessionId %>';
+let roomData = null;
+let sessionData = null;
+let startTime = Date.now();
+let timerInterval = null;
+let heartbeatInterval = null;
+let verificationTimeout = null;
+let secondsWatched = 0;
+let isTabActive = true;
+let tabSwitchCount = 0;
+
+// Initialize session
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadSessionData();
+  initializeTimer();
+  startHeartbeat();
+  setupVisibilityTracking();
+  setupVerificationSchedule();
+});
+
+// Load session data
+async function loadSessionData() {
+  try {
+    // Get session details from server (you'll need to create this endpoint)
+    const response = await fetch(`/api/watch/sessions/${sessionId}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      sessionData = data.session;
+      roomData = data.room;
+      
+      // Update UI
+      document.getElementById('video-title').textContent = roomData.contentTitle;
+      document.getElementById('creator-name').textContent = roomData.creatorId.username;
+      document.getElementById('required-time').textContent = roomData.requiredWatchMinutes;
+      
+      // Load video
+      loadVideo(roomData.contentUrl);
+      
+      // Resume progress if returning
+      if (sessionData.minutesWatched > 0) {
+        secondsWatched = sessionData.minutesWatched * 60;
+        updateProgress();
+      }
+      
+      document.getElementById('session-status').innerHTML = `
+        <i class="fas fa-play-circle me-2 text-success"></i>Session active
+      `;
+      document.getElementById('session-status').className = 'alert alert-success';
+    } else {
+      alert('Session not found');
+      window.location.href = '/watch-rooms';
+    }
+  } catch (error) {
+    console.error('Error loading session:', error);
+    alert('Error loading session');
+  }
+}
+
+// Load video into iframe
+function loadVideo(url) {
+  // Extract video ID from YouTube URL
+  let videoId = '';
+  
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1].split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1].split('?')[0];
+  }
+  
+  if (videoId) {
+    document.getElementById('video-player').src = 
+      `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
+  }
+}
+
+// Initialize timer
+function initializeTimer() {
+  timerInterval = setInterval(() => {
+    if (isTabActive) {
+      secondsWatched++;
+      updateProgress();
+      
+      // Check if completed
+      if (Math.floor(secondsWatched / 60) >= roomData.requiredWatchMinutes) {
+        completeSession();
+      }
+    }
+  }, 1000);
+}
+
+// Update progress display
+function updateProgress() {
+  const minutes = Math.floor(secondsWatched / 60);
+  const seconds = secondsWatched % 60;
+  const requiredMinutes = roomData.requiredWatchMinutes;
+  const percentage = Math.min(100, (minutes / requiredMinutes) * 100);
+  
+  // Update timer
+  document.getElementById('timer-display').textContent = 
+    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  
+  // Update progress bar
+  document.getElementById('progress-bar').style.width = `${percentage}%`;
+  document.getElementById('progress-text').textContent = `${Math.round(percentage)}%`;
+  document.getElementById('progress-percentage').textContent = `${Math.round(percentage)}%`;
+  
+  // Update stats
+  document.getElementById('minutes-watched').textContent = minutes;
+  document.getElementById('credits-earning').textContent = 
+    Math.floor(minutes * (roomData.creditsPerMinute || 1));
+}
+
+// Start heartbeat (send progress updates)
+function startHeartbeat() {
+  // Send update every 30 seconds
+  heartbeatInterval = setInterval(async () => {
+    if (!isTabActive) return;
+    
+    try {
+      const minutes = Math.floor(secondsWatched / 60);
+      
+      const response = await fetch(`/api/watch/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          minutesWatched: minutes,
+          checkpoint: false
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        console.error('Heartbeat failed:', data.message);
+      }
+    } catch (error) {
+      console.error('Heartbeat error:', error);
+    }
+  }, 30000); // Every 30 seconds
+}
+
+// Setup tab visibility tracking
+function setupVisibilityTracking() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isTabActive = false;
+      tabSwitchCount++;
+      console.log('Tab switched away', tabSwitchCount);
+    } else {
+      isTabActive = true;
+      console.log('Tab focused again');
+    }
+  });
+}
+
+// Setup verification prompts
+function setupVerificationSchedule() {
+  // Random interval between 2-5 minutes
+  const scheduleNext = () => {
+    const interval = (2 + Math.random() * 3) * 60 * 1000; // 2-5 minutes
+    
+    verificationTimeout = setTimeout(() => {
+      showVerificationPrompt();
+    }, interval);
+  };
+  
+  scheduleNext();
+}
+
+// Show verification prompt
+function showVerificationPrompt() {
+  const modal = new bootstrap.Modal(document.getElementById('verifyModal'));
+  modal.show();
+  
+  let countdown = 30;
+  const countdownEl = document.getElementById('verify-countdown');
+  
+  const countdownInterval = setInterval(() => {
+    countdown--;
+    countdownEl.textContent = countdown;
+    
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+      modal.hide();
+      
+      // Failed verification
+      alert('Verification timeout. Please stay focused on the video.');
+    }
+  }, 1000);
+  
+  // Store interval so it can be cleared on submission
+  window.verifyCountdownInterval = countdownInterval;
+}
+
+// Submit verification
+async function submitVerification() {
+  clearInterval(window.verifyCountdownInterval);
+  bootstrap.Modal.getInstance(document.getElementById('verifyModal')).hide();
+  
+  try {
+    const minutes = Math.floor(secondsWatched / 60);
+    
+    const response = await fetch(`/api/watch/sessions/${sessionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        minutesWatched: minutes,
+        checkpoint: true
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      // Show success feedback
+      const statusEl = document.getElementById('session-status');
+      statusEl.innerHTML = '<i class="fas fa-check-circle me-2"></i>Verification successful!';
+      statusEl.className = 'alert alert-success';
+      
+      setTimeout(() => {
+        statusEl.innerHTML = '<i class="fas fa-play-circle me-2 text-success"></i>Session active';
+      }, 3000);
+      
+      // Schedule next verification
+      setupVerificationSchedule();
+    }
+  } catch (error) {
+    console.error('Verification error:', error);
+  }
+}
+
+// Complete session
+async function completeSession() {
+  clearInterval(timerInterval);
+  clearInterval(heartbeatInterval);
+  clearTimeout(verificationTimeout);
+  
+  try {
+    const minutes = Math.floor(secondsWatched / 60);
+    
+    const response = await fetch(`/api/watch/sessions/${sessionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        minutesWatched: minutes,
+        checkpoint: true
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success && data.session.status === 'completed') {
+      // Show completion modal
+      document.getElementById('final-credits').textContent = data.session.creditsEarned;
+      
+      // Fetch updated user balance
+      const userResponse = await fetch('/api/credits/balance');
+      const userData = await userResponse.json();
+      
+      if (userData.success) {
+        document.getElementById('final-balance').textContent = userData.credits.current;
+      }
+      
+      const modal = new bootstrap.Modal(document.getElementById('completionModal'));
+      modal.show();
+    }
+  } catch (error) {
+    console.error('Complete session error:', error);
+  }
+}
+
+// Confirm exit
+function confirmExit() {
+  if (confirm('Are you sure you want to exit? Your progress will be saved, but you won\'t earn credits until you complete the required watch time.')) {
+    clearInterval(timerInterval);
+    clearInterval(heartbeatInterval);
+    clearTimeout(verificationTimeout);
+    window.location.href = '/watch-rooms';
+  }
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', (e) => {
+  clearInterval(timerInterval);
+  clearInterval(heartbeatInterval);
+  clearTimeout(verificationTimeout);
+});
+</script>
+
+<%- include('partials/footer') %>

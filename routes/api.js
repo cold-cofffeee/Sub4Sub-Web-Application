@@ -12,6 +12,10 @@ const Subscription = require('../models/Subscription');
 const Notification = require('../models/Notification');
 const Payment = require('../models/Payment');
 
+// Import new controllers
+const watchController = require('../controllers/watchController');
+const referralController = require('../controllers/referralController');
+
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -275,5 +279,102 @@ router.post('/payments/demo', isAuthenticated, async (req, res) => {
     });
   }
 });
+
+// ===== WATCH ROOM ROUTES =====
+
+// Get available watch rooms
+router.get('/watch/rooms', isAuthenticated, watchController.getRooms);
+
+// Create a watch room
+router.post('/watch/rooms', isAuthenticated, watchController.createRoom);
+
+// Get user's created rooms
+router.get('/watch/my-rooms', isAuthenticated, watchController.getMyRooms);
+
+// Get user's active watch sessions
+router.get('/watch/my-sessions', isAuthenticated, watchController.getMySessions);
+
+// Join a watch room
+router.post('/watch/rooms/:roomId/join', isAuthenticated, watchController.joinRoom);
+
+// Update watch session progress (heartbeat)
+router.put('/watch/sessions/:sessionId', isAuthenticated, watchController.updateSession);
+
+// Cancel/close a room
+router.delete('/watch/rooms/:roomId', isAuthenticated, watchController.cancelRoom);
+
+// ===== CREDIT MANAGEMENT ROUTES =====
+
+// Get user's credit balance and history
+router.get('/credits/balance', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    
+    res.json({
+      success: true,
+      credits: {
+        current: user.credits,
+        dailyEarned: user.dailyCreditsEarned,
+        lifetimeEarned: user.lifetimeCreditsEarned,
+        lifetimeSpent: user.lifetimeCreditsSpent,
+        dailyLimit: user.isPremium || user.premiumTier !== 'free' 
+          ? require('../config/config').credits.dailyLimitPremium 
+          : require('../config/config').credits.dailyLimitFree,
+        resetDate: user.dailyCreditsReset
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching credit balance'
+    });
+  }
+});
+
+// Get credit pricing
+router.get('/credits/pricing', (req, res) => {
+  const config = require('../config/config');
+  
+  res.json({
+    success: true,
+    pricing: {
+      costs: config.credits.costs,
+      earnings: config.credits.earnings,
+      premiumMultipliers: config.credits.premiumMultipliers
+    }
+  });
+});
+
+// ===== QUALITY SCORE ROUTES =====
+
+// Get current user's quality score (limited info)
+router.get('/quality/score', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    
+    res.json({
+      success: true,
+      quality: {
+        tier: user.getQualityTier(),
+        accountAge: user.qualityMetrics.accountAge,
+        isPremium: user.isPremium || user.premiumTier !== 'free'
+        // Note: We don't expose the actual score to prevent gaming
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching quality score'
+    });
+  }
+});
+
+// ===== REFERRAL ROUTES =====
+
+// Get referral stats and code
+router.get('/referrals/stats', isAuthenticated, referralController.getReferralStats);
+
+// Get referral leaderboard
+router.get('/referrals/leaderboard', referralController.getLeaderboard);
 
 module.exports = router;
